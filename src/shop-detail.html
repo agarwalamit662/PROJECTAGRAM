@@ -1,0 +1,856 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="shop-button.html">
+<link rel="import" href="shop-common-styles.html">
+<link rel="import" href="shop-image.html">
+<link rel="import" href="shop-select.html">
+<link rel="import" href="shop-icons.html">
+<link rel="import" href="shop-tabs.html">
+<link rel="import" href="shop-tab.html">
+
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="shop-button.html">
+<link rel="import" href="shop-common-styles.html">
+<link rel="import" href="shop-form-styles.html">
+<link rel="import" href="shop-input.html">
+<link rel="import" href="shop-checkbox.html">
+
+<dom-module id="shop-detail">
+
+  <template>
+
+    <style include="shop-common-styles shop-button shop-form-styles shop-input shop-select">
+    
+
+      :host {
+        display: block;
+      }
+
+      #content {
+        @apply(--layout-horizontal);
+        /*@apply(--layout-center-justified);*/
+      }
+
+      shop-image {
+        position: relative;
+        margin: 64px 32px;
+        width: 30%;
+        max-width: 400px;
+        --shop-image-img: {
+          @apply(--layout-fit);
+          border-radius: 50%;
+          width: 320px;
+        };
+      }
+
+      #chat{
+        height:100%;
+      }
+
+      shop-input, shop-select {
+        font-size: 16px;
+      }
+
+      shop-select {
+        margin-bottom: 20px;
+      }
+
+      .grid {
+        margin-top: 40px;
+        @apply(--layout-horizontal);
+      }
+
+      
+      .grid > section {
+        @apply(--layout-flex);
+      }
+
+      .grid > section:not(:first-child) {
+        margin-left: 80px;
+      }
+
+      .row {
+        @apply(--layout-horizontal);
+        @apply(--layout-end);
+      }
+
+      .column {
+        @apply(--layout-vertical);
+      }
+
+      .row > .flex,
+      .input-row > * {
+        @apply(--layout-flex);
+      }
+
+      .input-row > *:not(:first-child) {
+        margin-left: 8px;
+      }
+
+      .shop-select-label {
+        line-height: 20px;
+      }
+
+      shop-image::before {
+        content: "";
+        display: block;
+        padding-top: 100%;
+      }
+
+      .detail {
+        margin: 64px 32px;
+        width: 70%;
+        max-width: 600px;
+        transition: opacity 0.4s;
+        opacity: 0;
+      }
+
+      .main-frames {
+        transition: opacity 0.5s;
+        margin: 0 auto;
+        padding: 0 24px 48px 24px;
+        overflow: hidden;
+        margin-top: 30px;
+      }
+
+      #tabContainer {
+        position: relative;
+        height: 66px;
+        background-color: #1976D2;
+      }
+
+      shop-tabs, shop-tab {
+        --shop-tab-overlay: {
+          border-bottom: 2px solid var(--app-accent-color);
+        };
+      }
+
+      shop-tabs {
+        height: 100%;
+      }
+
+      shop-tab {
+        margin: 0 10px;
+      }
+
+      shop-tab a {
+        display: inline-block;
+        outline: none;
+        padding: 9px 5px;
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: none;
+        color: var(--app-primary-color);
+      }
+
+      .detail[has-content] {
+        opacity: 1;
+      }
+
+      .chat-list {
+          overflow-y: scroll;
+          padding-bottom: 16px;
+      }
+
+      h1 {
+        font-size: 24px;
+        font-weight: 500;
+        line-height: 28px;
+        margin: 0;
+      }
+
+      .price {
+        margin: 16px 0 40px;
+        font-size: 16px;
+        color: var(--app-secondary-color);
+      }
+
+      .shim {
+        position: fixed;
+        bottom: 54px;
+        left: 0;
+        right: 0;
+        height: 36px;
+        background: linear-gradient(rgba(255,255,255,0), #eee 80%) top center no-repeat;
+    }
+        .send-message {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          margin: 10px;
+          display: flex;
+          padding: 0 16px 6px 16px;
+      }
+
+      #checkoutForm{
+        display: flex;
+        width: 100%;
+        background: white;
+      }
+
+      #inputChat{
+            -ms-flex: 1 1 0.000000001px;
+            -webkit-flex: 1;
+            flex: 1;
+            -webkit-flex-basis: 0.000000001px;
+            flex-basis: 0.000000001px;
+      }
+
+      .description {
+        margin: 32px 0;
+      }
+
+      .description > h2 {
+        margin: 16px 0;
+        margin-right: 10px;
+        font-size: 13px;
+        display: inline;
+      }
+
+      .description > p {
+        margin: 0;
+        color: var(--app-secondary-color);
+        display: inline;
+      }
+
+      .pickers {
+        @apply(--layout-vertical);
+        border-top: 1px solid #ccc;
+      }
+
+      shop-select > select {
+        font-size: 16px;
+        padding: 16px 24px 16px 70px;
+      }
+
+      @media (max-width: 767px) {
+
+        #content {
+          @apply(--layout-vertical);
+          @apply(--layout-center);
+        }
+
+        shop-image {
+          margin: 0;
+          margin-top: 10px;
+          width: 100%;
+          --shop-image-img: {
+          @apply(--layout-fit);
+          border-radius: 0%;
+          };
+        }
+
+        .grid {
+          display: block;
+          margin-top: 0;
+        }
+
+        .grid > section:not(:first-child) {
+          margin-left: 0;
+        }
+
+        .detail {
+          box-sizing: border-box;
+          margin: 32px 0;
+          padding: 0 24px;
+          width: 100%;
+          max-width: 600px;
+        }
+
+        h1 {
+          font-size: 20px;
+          line-height: 24px;
+        }
+
+        .price {
+          font-size: inherit;
+          margin: 12px 0 32px;
+        }
+
+      }
+
+    </style>
+
+    <!--
+      app-route provides the name of the category and the item.
+    -->
+    <firebase-auth
+        id="auth"
+        provider="email"
+        signed-in="{{signedIn}}"
+        user="{{user}}"
+        on-error="handleError">
+    </firebase-auth>
+
+    <app-route
+        route="[[route]]"
+        pattern="/:item"
+        data="{{routeData}}"></app-route>
+
+    <!-- <template is="dom-if" if="[[_computeCall(route,visible)]]">    -->
+
+    <firebase-document
+      path="/users/[[user.uid]]"
+      data="{{loguserFirebase}}">
+    </firebase-document>
+
+    <!-- <firebase-document
+      path="/chats/[[user.uid]]/[[routeData.item]]"
+      data="{{loguserFirebase}}">
+    </firebase-document> -->
+
+    <firebase-query log
+      id="chats"
+      path="/chats/[[user.uid]]/[[routeData.item]]"
+      order-by-child="_timestamp"
+      data="{{chatdata}}">
+    </firebase-query>
+
+
+    <firebase-document
+      path="/users/[[routeData.item]]"
+      data="{{userFirebase}}">
+    </firebase-document>
+
+    <app-indexeddb-mirror
+        session="[[user.uid]]"
+        key="[[_computePath(routeData.item,visible)]]"
+        data="{{userFirebase}}"
+        persisted-data="{{item}}">
+    </app-indexeddb-mirror>
+
+    <firebase-document
+      path="/teams/[[item.team]]"
+      data="{{categoryFirebase}}">
+    </firebase-document>
+    
+
+    <app-indexeddb-mirror
+        session="[[user.uid]]"
+        key="[[_computePath(item.team,visible)]]"
+        data="{{categoryFirebase}}"
+        persisted-data="{{category}}">
+    </app-indexeddb-mirror>
+
+    
+    <!-- </template> -->
+
+          <!-- Lazy-create the tabs for larger screen sizes. -->
+    <div id="tabContainer" sticky$="[[_shouldShowTabs]]">
+        <shop-tabs
+                selected="[[categoryName]]"
+                attr-for-selected="name">
+              <!-- <dom-repeat items="[[categories]]" as="category" initial-count="4">
+                <template> -->
+                
+                <shop-tab name="profile">
+                  <a on-click = "changeState" data-args="profile">Profile</a>
+                </shop-tab>
+
+                <shop-tab name="chat">
+                  <a on-click = "changeState" data-args="chat">Chat</a>
+                  <!-- <a href='javascript:;' onclick="changeState(announcements);">Announcements</a> -->
+                </shop-tab>
+
+                <!-- </template>
+              </dom-repeat> -->
+            </shop-tabs>
+    </div>
+
+
+    <div class="main-frames">
+      <iron-pages selected="[[categoryName]]" attr-for-selected="state">
+        <div state="profile">
+
+    <div id="content" hidden$="[[failure]]">
+      <shop-image alt="[[item.name]]" src="[[_computeImg(routeData.item,visible)]]"></shop-image>
+      <div class="detail" has-content$="[[_isDefined(item)]]">
+        <h1>[[item.name]]</h1>
+        <!-- <div class="price">[[_formatPrice(item.price)]]</div> -->
+        <div class="price">[[item.designation]]</div>
+        <div class="description">
+          <h2>E-Mail: </h2>
+          <p id="emailId"></p>
+          <hr>
+
+          <h2>Date Of Birth: </h2>
+          <p id="dob"></p>
+          <hr>
+
+          <h2>Mobile Number: </h2>
+          <p id="mobileNum"></p>
+          <hr>
+
+          <h2>Team: </h2>
+          <p id="team">[[category.title]]</p>
+          <hr>
+
+          <h2>Description</h2>
+          <p id="desc"></p>
+          <hr>
+
+          <shop-button>
+              <a href = "[[item.fblink]]" target="_blank" >Facebook</a>
+          </shop-button>
+
+          <shop-button>
+            <a href = "[[item.linkedin]]" target="_blank" >LinkedIn</a>
+          </shop-button> 
+
+        </div>
+        
+        </div>
+      </div>
+
+
+    </div>
+
+    <div state="chat">
+          <!-- <form
+              id="checkoutForm"
+              is="iron-form"
+              method="post"
+              action="/data/sample_success_response.json"
+              on-iron-form-response="_didReceiveResponse"
+              on-iron-form-presubmit="_willSendRequest">
+
+              <section>
+              <div class="column">
+                  <shop-input>
+                    <input type="textArea" id="message" name="message"
+                        placeholder="Type Message" required
+                        aria-labelledby="messageLabel">
+                    <shop-md-decorator error-message="Invalid Message" aria-hidden="true">
+                      <label id="accountDescriptionLabel">Type Message</label>
+                      <shop-underline></shop-underline>
+                    </shop-md-decorator>
+                  </shop-input>
+                  <shop-button id="submitBox">
+                      <input type="button" on-click="_submit" value="Send">
+                  </shop-button>
+              </div>
+              </section> 
+            </form> -->
+      <div id = "chatlooper" class="chatloopouter" style="margin-bottom: 60px; width:100%;">      
+      <template is="dom-repeat" items="[[chatdata]]" as="chat">  
+          <template is="dom-if" if="[[isLoggedInSender(chat.senderid)]]">
+            <div class="chatloop" style="margin-bottom: 5px;overflow: hidden;">
+              <div style="
+                float: right;
+                clear: right;
+                max-width: 85%;
+                padding: 5px;
+                background: antiquewhite;
+                border-radius: 10%;
+                word-wrap: break-word;">
+                <p><b>[[chat.sendername]]</b></p>
+                <p>[[chat.message]]</p>
+              </div>
+            </div>
+          </template>
+          <template is="dom-if" if="[[!isLoggedInSender(chat.senderid)]]">
+            <div class="chatloop" style="margin-bottom: 5px;overflow: hidden;">
+              <div style="
+                float: left;
+                clear: left;
+                max-width: 85%;
+                padding: 5px;
+                background: cornsilk;
+                border-radius: 10%;
+                word-wrap: break-word">
+                <p><b>[[chat.sendername]]</b></p>
+                <p>[[chat.message]]</p>
+              </div>
+            </div>
+          </template>
+      <!-- <div class="chatloop" style="margin-bottom: 5px; background: yellow;">
+
+        <h2>[[chat.sendername]]</h2>
+        <p>[[chat.message]]</p> 
+      </div>  --> 
+        
+    </template>            
+    </div>
+      <div id="checkoutFormDiv" class="send-message">
+        <form
+              id="checkoutForm"
+              is="iron-form"
+              method="post"
+              >
+        <paper-input flex="" label="Type message..." id="inputChat" name="inputChat"></paper-input>
+        <paper-fab icon="send" id="sendButton" on-tap="_submit" role="button" tabindex="0" aria-label="send"></paper-fab>
+      </form>
+      </div>
+
+    </div>
+
+    </iron-pages>
+    </div>
+    
+  </template>
+
+  <script>
+
+    Polymer({
+
+      is: 'shop-detail',
+
+      properties: {
+
+        item: Object,
+
+        category: Object,
+
+        chatdata: {
+            type: Object,
+            notify : true
+        },
+
+        route: Object,
+
+        routeData: Object,
+
+        visible: Boolean,
+
+        _shouldShowTabs : {
+          type: Boolean,
+          value : true
+        },
+
+        categoryName : {
+          type: String,
+          value : ''
+        },
+
+        offline: {
+          type: Boolean,
+          observer: '_offlineChanged'
+        },
+
+        failure: Boolean
+
+      },
+
+      observers: [
+        '_itemChanged(item, visible)',
+        '_categoryChanged(category, visible)',
+        '_routeChanged(route)',
+        'chatdataChanged(chatdata.*)'
+      ],
+
+      chatdataChanged: function (newData) {
+    // do something when the query returns values
+          console.log('in _chatdataChanged');
+        if(this.categoryName == 'chat'){
+          /*var scrollTop = -1;
+          Polymer.AppLayout.scroll({ bottom: scrollTop, behavior: 'silent' }); */ 
+
+          var offsetHeight = this.$.chatlooper.offsetHeight;
+
+          console.log('offsetHeight');
+          console.log(offsetHeight);
+
+          var offsetHeightHeader = this.$.tabContainer.offsetHeight+64+200;
+          
+          console.log('offsetHeightHeader');
+          console.log(offsetHeightHeader);
+
+          var scrollTop = offsetHeight+offsetHeightHeader;
+          console.log(scrollTop);
+          Polymer.AppLayout.scroll({ top: scrollTop, behavior: 'silent' });  
+                    
+        }
+        console.log('in _chatdataChanged end');
+      },
+
+      _chatdataChanged: function(chatdata){
+        console.log('in _chatdataChanged');
+        if(this.categoryName == 'chat'){
+          /*var scrollTop = -1;
+          Polymer.AppLayout.scroll({ bottom: scrollTop, behavior: 'silent' }); */ 
+
+          var offsetHeight = this.$.chatlooper.offsetHeight;
+
+          console.log('offsetHeight');
+          console.log(offsetHeight);
+
+          var offsetHeightHeader = this.$.tabContainer.offsetHeight+64+200;
+          
+          console.log('offsetHeightHeader');
+          console.log(offsetHeightHeader);
+
+          var scrollTop = offsetHeight+offsetHeightHeader;
+          console.log(scrollTop);
+          Polymer.AppLayout.scroll({ top: scrollTop, behavior: 'silent' });  
+                    
+        }
+
+      },
+
+      _routeChanged: function(route){
+        console.log('in _routeChanged');
+        console.log(route);
+        if(route && route.prefix == '/detail'){
+          this.categoryName = 'profile';
+          
+        }
+        console.log('in _routeChanged end');
+
+      },
+
+      changeState: function(e) {
+
+        //var args = Polymer.dom(e).path[1].getAttribute('data-args');
+
+        var args = e.target.dataset.args.split(',');
+        console.log('args');
+        console.log(args);
+        console.log('args');
+
+                //alert(args[0] + args[1]);
+
+        console.log('in changeState');
+        console.log(args[0]);
+        console.log('in changeState');
+
+        this.categoryName = args[0];
+        //this.set('route.path', state);
+        console.log('categoryName');
+        console.log(this.categoryName);
+        if(this.categoryName == 'chat'){
+          
+          var offsetHeight = this.$.chatlooper.offsetHeight;
+
+          console.log('offsetHeight');
+          console.log(offsetHeight);
+
+          var offsetHeightHeader = this.$.tabContainer.offsetHeight;
+          
+          console.log('offsetHeightHeader');
+          console.log(offsetHeightHeader);
+
+          var scrollTop = offsetHeight+offsetHeightHeader+64;
+          console.log(scrollTop);
+          Polymer.AppLayout.scroll({ top: scrollTop, behavior: 'silent' });  
+        }
+        else{
+          var scrollTop = 0;
+          Polymer.AppLayout.scroll({ top: scrollTop, behavior: 'silent' });
+        }
+
+        
+      },
+
+      isLoggedInSender: function(senderid){
+        if(this.user.uid == senderid){
+          return true;
+        }
+        else{
+          return false;
+        }
+      },
+
+      _itemChanged: function(item, visible) {
+        if (visible && this.route.prefix == '/detail') {
+          
+          this.debounce('item-change', function() {
+            // The item description contains escaped HTML (e.g. "&lt;br&gt;"), so we need to
+            // unescape it ("<br>") and set it as innerHTML.
+            
+            var text = item ? item.shortBio : '';
+            if(this.$.desc)
+              this.$.desc.innerHTML = this._unescapeText(text);
+
+            text = item ? item.emailId : '';
+            if(this.$.emailId)
+              this.$.emailId.innerHTML = this._unescapeText(text);
+
+            text = item ? item.dob : '';
+            
+            if(this.$.dob)
+              this.$.dob.innerHTML = this._unescapeText(text);
+
+            
+            text = item ? item.mobileNum : '';
+            if(this.$.mobileNum)
+              this.$.mobileNum.innerHTML = this._unescapeText(text);
+
+            this.fire('change-section', {
+              category: item.category,
+              title: item.name
+            });
+          });
+        }
+      },
+
+      
+
+      _categoryChanged: function(category, visible) {
+        
+        if (visible && this.route.prefix == '/detail') {
+          var text = category ? category.title : '';
+          if(this.$.team)
+            this.$.team.innerHTML = this._unescapeText(text);
+        }
+      },
+
+      _unescapeText: function(text) {
+        var elem = document.createElement('textarea');
+        elem.innerHTML = text;
+        return elem.textContent;
+      },
+
+      _formatPrice: function(price) {
+        return price ? '$' + price.toFixed(2) : '';
+      },
+
+      _addToCart: function() {
+        // This event will be handled by shop-app.
+        this.fire('add-cart-item', {
+          item: this.item,
+          quantity: parseInt(this.$.quantitySelect.value, 10),
+          size: this.$.sizeSelect.value
+        });
+      },
+
+      _openFb: function(object){
+        return window.open(object,'_blank');
+      },
+
+      _isDefined: function(item) {
+        return item != null;
+      },
+
+      _tryReconnect: function() {
+        this.$.categoryData.refresh();
+      },
+
+      _offlineChanged: function(offline) {
+        if (!offline) {
+          this._tryReconnect();
+        }
+      },
+      _computeImg: function(teamName,visible) {
+
+            if (visible && this.route.prefix == '/detail') {
+                 return teamName ? 'https://firebasestorage.googleapis.com/v0/b/note-app-firebase-5320d.appspot.com/o/users%2F'+teamName+'.jpg?alt=media' : '';
+            }
+            
+      },
+
+      _computePath: function(path,visible){
+
+            
+            if(visible && this.route.prefix == '/detail'){
+              return path ? path : '';              
+
+            }
+            else{
+              return null;
+            }
+
+        },
+
+        _computeCall: function(route,visible) {
+
+
+
+          if(visible && route && route.prefix == '/detail'){
+            return true;
+          }
+          else return false;
+        },
+
+
+        _submit: function(e) {
+        
+          if(this.$.inputChat.value == null || this.$.inputChat.value.length == 0){
+
+            var snackbar  = document.createElement('shop-snackbar');
+            Polymer.dom(this.root).appendChild(snackbar);
+          
+            Polymer.dom(snackbar).innerHTML = 'Message Empty';
+            snackbar.open();
+          }else{
+            
+            console.log('message not empty');
+            
+            
+
+            var app = this.$.auth.app;
+          //var key = app.database().ref('events/').push();
+            var _timestamp = Date.now();
+
+            console.log(this.item.name);
+            console.log(this.user.uid);
+
+            var postData = {
+              sendername: this.loguserFirebase.name,
+              senderid: this.user.uid,
+              message: this.$.inputChat.value,
+              _timestamp: _timestamp
+            };
+
+  // Get a key for a new Post.
+          var newPostKey = app.database().ref().child('chats').child(this.user.uid).child(this.routeData.item).push().key;
+
+  // Write the new post's data simultaneously in the posts list and the user's post list.
+          var updates = {};
+          updates['/chats/' + this.user.uid+'/'+this.routeData.item+'/'+newPostKey] = postData;
+          updates['/chats/' + this.routeData.item+'/'+this.user.uid+'/'+newPostKey] = postData;
+          app.database().ref().update(updates);
+
+
+          this.$.inputChat.value = '';     
+          
+          /*var scrollTop = -1;
+          Polymer.AppLayout.scroll({ bottom: scrollTop, behavior: 'silent' });  */
+
+          var offsetHeight = this.$.chatlooper.offsetHeight;
+
+          console.log('offsetHeight');
+          console.log(offsetHeight);
+
+          var offsetHeightHeader = this.$.tabContainer.offsetHeight +64+200;
+          
+          console.log('offsetHeightHeader');
+          console.log(offsetHeightHeader);
+
+          
+
+          var offsetHeightHeaderDiv = this.$.checkoutFormDiv.offsetHeight;
+          
+          console.log('checkoutFormDiv');
+          console.log(offsetHeightHeaderDiv);
+
+          var scrollTop = offsetHeight+offsetHeightHeader;
+          console.log(scrollTop);
+          Polymer.AppLayout.scroll({ top: scrollTop, behavior: 'silent' });  
+
+          }
+          
+        
+      },
+
+    });
+
+  </script>
+
+</dom-module>

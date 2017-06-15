@@ -1,0 +1,464 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="shop-common-styles.html">
+<link rel="import" href="shop-image.html">
+<link rel="import" href="shop-list-item.html">
+<link rel="import" href="shop-tabs.html">
+<link rel="import" href="shop-tab.html">
+<link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<dom-module id="shop-list">
+
+  <template>
+
+    <style include="shop-common-styles">
+
+      .hero-image {
+        position: relative;
+        height: 320px;
+        overflow: hidden;
+        margin-bottom: 32px;
+      }
+
+      .main-frame {
+        transition: opacity 0.5s;
+      }
+
+      .hero-image {
+        --shop-image-img: {
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          left: -9999px;
+          right: -9999px;
+          max-width: none;
+        };
+      }
+
+      #tabContainer {
+        position: relative;
+        height: 66px;
+        background-color: #1976D2;
+      }
+
+      shop-tabs, shop-tab {
+        --shop-tab-overlay: {
+          border-bottom: 2px solid var(--app-accent-color);
+        };
+      }
+
+      shop-tabs {
+        height: 100%;
+      }
+
+      shop-tab {
+        margin: 0 10px;
+      }
+
+      shop-tab a {
+        display: inline-block;
+        outline: none;
+        padding: 9px 5px;
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: none;
+        color: var(--app-primary-color);
+      }
+
+      .grid {
+        @apply(--layout-horizontal);
+        @apply(--layout-wrap);
+        /*@apply(--layout-justified);*/
+        margin: 0 10px 32px 10px;
+        padding: 0;
+        list-style: none;
+      }
+
+      header{
+        margin-top:20px;
+      }
+
+      .grid li {
+        -webkit-flex: 1 1;
+        flex: 1 1;
+        -webkit-flex-basis: 33%;
+        flex-basis: 33%;
+        max-width: 33%;
+      }
+
+      .grid a {
+        display:block;
+        text-decoration: none;
+      }
+
+      @media (max-width: 767px) {
+        .hero-image {
+          display: none;
+        }
+
+        .grid  li {
+          -webkit-flex-basis: 50%;
+          flex-basis: 50%;
+          max-width: 50%;
+        }
+      }
+
+    </style>
+
+    <!--
+      app-route provides the name of the category.
+    -->
+    <app-route
+        route="[[route]]"
+        pattern="/:team"
+        data="{{routeData}}"
+        ></app-route>
+
+    <!-- <template is="dom-if" if="[[_computeCall(route,visible)]]"> -->
+              
+
+
+    <firebase-document
+      path="/teams/[[routeData.team]]"
+      data="{{categoryFirebase}}">
+    </firebase-document> 
+
+    
+    <app-indexeddb-mirror
+        session="[[user.uid]]"
+        key="[[_computePath(routeData.team,visible)]]"
+        data="{{categoryFirebase}}"
+        persisted-data="{{category}}">
+    </app-indexeddb-mirror>
+
+          <!-- Lazy-create the tabs for larger screen sizes. -->
+    <div id="tabContainer" sticky$="[[_shouldShowTabs]]">
+        <shop-tabs
+                selected="[[categoryName]]"
+                attr-for-selected="name">
+              <!-- <dom-repeat items="[[categories]]" as="category" initial-count="4">
+                <template> -->
+                
+                <shop-tab name="members">
+                  <a on-click = "changeState" data-args="members">Members</a>
+                </shop-tab>
+
+                <shop-tab name="announcements">
+                  <a on-click = "changeState" data-args="announcements">Announcements</a>
+                  <!-- <a href='javascript:;' onclick="changeState(announcements);">Announcements</a> -->
+                </shop-tab>
+
+                <!-- </template>
+              </dom-repeat> -->
+            </shop-tabs>
+    </div>
+
+
+    <!-- <shop-image
+        alt="[[category.title]]"
+        src="[[_computeImg(category.name,visible)]]"
+        placeholder-img="[[category.placeholder]]" class="hero-image"></shop-image> -->
+
+    <shop-image
+        alt="[[category.title]]"
+        src="[[teamName]]"
+        placeholder-img="[[category.placeholder]]" class="hero-image"></shop-image>    
+
+    <firebase-document
+      path="/teams/[[routeData.team]]/members"
+      data="{{categoryMembersFirebase}}">
+    </firebase-document>
+
+    
+    <app-indexeddb-mirror
+        session="[[user.uid]]"
+        key="[[_computePathMembers(routeData.team,visible)]]"
+        data="{{categoryMembersFirebase}}"
+        persisted-data="{{categoryMembers}}">
+    </app-indexeddb-mirror>
+
+    <div class="main-frame">
+      <iron-pages selected="[[categoryName]]" attr-for-selected="state">
+        <div state="members">
+
+
+          <header>
+            <h1>[[category.title]]</h1>
+            <span>[[_arrLen(categoryMembers,visible)]]</span>
+          </header>
+
+
+
+          <ul class="grid" hidden$="[[failure]]">
+            <template is="dom-repeat" items="[[_toArray(categoryMembers,visible)]]" initial-count="4">
+              <li>
+                <a href$="[[_getItemHref(item)]]"><shop-list-item item="[[item]]"></shop-list-item></a>
+              </li>
+            </template>
+          </ul>
+       </div>
+       
+       <!-- Success message UI -->
+        <header state="announcements">
+          <h1>Thank you</h1>
+          <p>Bye</p>
+          <shop-button responsive>
+            <a href="#/home">Go to Home</a>
+          </shop-button>
+        </header>
+
+
+     </iron-pages>
+   </div>
+
+
+  <!-- </template> -->
+  </template>
+
+  <script>
+
+    Polymer({
+
+      is: 'shop-list',
+
+      properties: {
+
+        category: {
+          type: Object,
+          notify : true
+        },
+
+        _shouldShowTabs : {
+          type: Boolean,
+          value : true
+        },
+
+        categoryName : {
+          type: String,
+          value : ''
+        },
+
+        teamName : {
+          type: String,
+          notify : true,
+          value : ''
+        },
+
+        categoryMembers : {
+          type: Object,
+          notify : true
+        },
+
+        route: Object,
+
+        routeData: Object,
+
+        visible: Boolean,
+
+        page: {
+          type: String,
+          reflectToAttribute: true,
+        },
+
+        
+        offline: {
+          type: Boolean,
+          observer: '_offlineChanged'
+        },
+
+        failure: Boolean
+
+      },
+
+      observers: [
+        '_categoryChanged(category, visible)',
+        '_routeChanged(route)'
+      ],
+
+      _routeChanged: function(route){
+        console.log('in _routeChanged');
+        console.log(route);
+        if(route && route.prefix == '/list'){
+          this.categoryName = 'members';
+          
+        }
+        console.log('in _routeChanged end');
+
+      },
+
+      _getListItems: function(items) {
+        // Return placeholder items when the items haven't loaded yet.
+        return items || [{},{},{},{},{},{},{},{},{},{}];
+      },
+
+      ready: function() {
+
+        this.categoryName = 'members';
+
+      },
+
+      changeState: function(e) {
+
+        //var args = Polymer.dom(e).path[1].getAttribute('data-args');
+
+        var args = e.target.dataset.args.split(',');
+        console.log('args');
+        console.log(args);
+        console.log('args');
+
+                //alert(args[0] + args[1]);
+
+        console.log('in changeState');
+        console.log(args[0]);
+        console.log('in changeState');
+
+        this.categoryName = args[0];
+        //this.set('route.path', state);
+        var scrollTop = 0;
+        Polymer.AppLayout.scroll({ top: scrollTop, behavior: 'silent' });
+      },
+
+      _getItemHref: function(item) {
+        // By returning null when `itemId` is undefined, the href attribute won't be set and
+        // the link will be disabled.
+        /*return item.name ? ['#/detail', item.name].join('/') : null;*/
+        return item.name ? ['#/detail', item.name].join('/') : null;
+      },
+
+      _getPluralizedQuantity: function(quantity) {
+        if (!quantity) {
+          return '';
+        }
+        var pluralizedQ = quantity === 1 ? 'item' : 'items';
+        return  '(' + quantity + ' ' + pluralizedQ + ')';
+      },
+
+      _categoryChanged: function(category, visible) {
+        if (visible && this.route.prefix == '/list') {
+          if (!category) {
+            this.fire('show-invalid-url-warning');
+          } else {
+
+            console.log('category name');
+          console.log(category);
+          console.log('this.category name');
+          console.log(this.category);
+          console.log('category name end');
+          this.teamName = category.name ? 'https://firebasestorage.googleapis.com/v0/b/note-app-firebase-5320d.appspot.com/o/teams%2F'+category.name+'.png?alt=media' : '';
+
+            this.debounce('change-section', function() {
+              // Notify the category and the page's title
+              this.fire('change-section', {
+                category: category.name,
+                title: category.title
+              });
+            });
+          }
+        }
+      },
+
+      _tryReconnect: function() {
+        this.$.categoryData.refresh();
+      },
+
+      _offlineChanged: function(offline) {
+        if (!offline) {
+          this._tryReconnect();
+        }
+      },
+
+      _computeCall: function(route,visible) {
+
+
+
+          if(visible && route && route.prefix == '/list'){
+            return true;
+          }
+          else return false;
+        },
+
+      _computeImg: function(teamName,visible) {
+
+          console.log('_computeImg');
+          console.log('teamName');
+          console.log(teamName);
+          console.log('visible');
+          console.log(visible);
+          console.log('route');
+          console.log(this.route);
+          console.log('route end');
+          if(visible && this.route.prefix == '/list'){
+            return teamName ? 'https://firebasestorage.googleapis.com/v0/b/note-app-firebase-5320d.appspot.com/o/teams%2F'+teamName+'.png?alt=media' : '';
+          }
+        },
+
+      _toArray: function(obj,visible) {
+          if (visible) {
+              return Object.keys(obj).map(function(key) {
+                  return {
+                      name: key,
+                      value: obj[key]
+                  };
+              });
+          }
+
+        },
+        _arrLen: function(obj,visible) {
+           
+          if (visible)  {
+
+
+            var count = Object.keys(obj).length;
+
+            if (!count) {
+              return '';
+            }
+            var pluralizedQ = count === 1 ? 'member' : 'members';
+            return  '(' + count + ' ' + pluralizedQ + ')';
+
+          }
+
+        },
+
+        _computePath: function(path,visible){
+
+            if(visible && this.route.prefix == '/list'){
+              return path ? path : '';              
+
+            }
+            else{
+              return null;
+            }
+
+        },
+
+        _computePathMembers: function(path,visible){
+
+            if(visible && this.route.prefix == '/list'){
+              return path ? path+'members' : '';              
+
+            }
+            else{
+              return null;
+            }
+
+        } 
+
+    });
+
+  </script>
+
+</dom-module>

@@ -1,0 +1,27 @@
+{
+  "name": "note-app",
+  "version": "0.10.3",
+  "description": "A starting point for Polymer & Firebase apps",
+  "scripts": {
+    "build": "gulp"
+  },
+  "license": "http://polymer.github.io/LICENSE.txt",
+  "engines": {
+    "node": ">=4.0"
+  },
+  "private": true,
+  "devDependencies": {
+    "css-slam": "^1.1.0",
+    "del": "^2.2.1",
+    "gulp": "gulpjs/gulp#4.0",
+    "gulp-html-minifier": "^0.1.8",
+    "gulp-if": "^2.0.1",
+    "gulp-imagemin": "^3.0.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-server-livereload": "^1.8.4",
+    "gulp-uglify": "^2.0.0",
+    "merge-stream": "^1.0.0",
+    "plylog": "^0.4.0",
+    "polymer-build": "^0.6.0-alpha.3"
+  }
+}

@@ -1,0 +1,40 @@
+<!-- <link rel="import" href="../bower_components/paper-toast/paper-toast.html"> -->
+<link rel="import" href="../bower_components/platinum-sw/platinum-sw-elements.html">
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-app.html">
+<dom-module id="ss-fire">
+  <template>
+    <!-- <firebase-app
+      api-key="AIzaSyAdqGBB201Vii5x0oQRv7fVh_iYfm6i5Hw"
+      auth-domain="shakescript.firebaseapp.com"
+      database-url="https://shakescript.firebaseio.com"
+      storage-bucket="shakescript.appspot.com">
+    </firebase-app> -->
+    
+  <!-- <platinum-sw-register
+      auto-register
+      skip-waiting
+      clients-claim
+      href="../sw-import.js"
+      >
+    <platinum-sw-cache
+        default-cache-strategy="networkFirst">
+    </platinum-sw-cache>
+  </platinum-sw-register> --> 
+
+
+    <firebase-app
+    api-key="AIzaSyBMPFDn8mbrlxockxWD2OI6NSl9DNK4IRo"
+    auth-domain="note-app-firebase-5320d.firebaseapp.com"
+    database-url="https://note-app-firebase-5320d.firebaseio.com"
+    storage-bucket= "note-app-firebase-5320d.appspot.com"
+    messagingSenderId= "415567270724">
+  </firebase-app>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'ss-fire'
+    });
+  </script>
+</dom-module>

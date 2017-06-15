@@ -1,0 +1,380 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="shop-button.html">
+<link rel="import" href="shop-common-styles.html">
+<link rel="import" href="shop-form-styles.html">
+<link rel="import" href="shop-input.html">
+<link rel="import" href="shop-select.html">
+<link rel="import" href="shop-checkbox.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/neon-animation/animations/scale-up-animation.html">
+<link rel="import" href="../bower_components/neon-animation/animations/scale-down-animation.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<dom-module id="sa-login">
+  <template>
+    <style include="shop-common-styles shop-button shop-form-styles shop-input shop-select shop-checkbox">
+    
+      :host {
+        position: fixed;
+        top: 0px;
+        background-image: url('../images/social-sphere.jpg');
+        background-size: cover;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1;
+        color: var(--paper-white-50);
+
+        @apply(--layout);
+        @apply(--layout-center-center);
+      }
+
+      :host([signed-in]) {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .logo {
+        text-align: center;
+      }
+
+      .logo a{
+        font-size: 1.2em;
+        font-weight: 600;
+        text-align: center;
+        letter-spacing: 0.2em;
+        color: #fff;
+        text-decoration: none;
+        /* required for IE 11, so this <a> can receive pointer events */
+        display: inline-block;
+        pointer-events: auto;
+      }
+
+      
+      paper-button.google {
+          color: white !important;
+          background-color: #4285F4 !important;
+          vertical-align: middle;
+          text-transform: none;
+          font-size: 1.5em;
+          padding: 10px 25px 10px 25px;
+      }
+
+      iron-icon.iconsize {
+          width: 32px;
+          height: 32px;
+      }
+
+      iron-icon.headIcon {
+          width: 32px;
+          height: 32px;
+          padding-right: 5px;
+          padding-bottom: 5px;
+      }
+
+      app-header {
+        @apply(--layout-fixed-top);
+        z-index: 1;
+        height: 100px;
+        background-color: #1976D2;
+        --app-header-shadow: {
+          box-shadow: inset 0px 5px 6px -3px rgba(0, 0, 0, 0.2);
+          height: 10px;
+          bottom: -10px;
+        };
+
+      }
+
+      app-toolbar {
+        height: 100px;
+      }
+
+      .main-frame {
+        transition: opacity 0.5s;
+        background-color: white;
+      }
+
+      shop-input, shop-select {
+        font-size: 16px;
+      }
+
+      shop-select {
+        margin-bottom: 20px;
+      }
+
+      paper-spinner-lite {
+        position: fixed;
+        top: calc(50% - 14px);
+        left: calc(50% - 14px);
+      }
+
+      .grid {
+        margin-top: 40px;
+        @apply(--layout-horizontal);
+      }
+
+      .grid > section {
+        @apply(--layout-flex);
+      }
+
+      .grid > section:not(:first-child) {
+        margin-left: 80px;
+      }
+
+      .row {
+        @apply(--layout-horizontal);
+        @apply(--layout-end);
+      }
+
+      .fullwidth{
+        width: 100%;
+      }
+
+      .column {
+        @apply(--layout-vertical);
+      }
+
+      .row > .flex,
+      .input-row > * {
+        @apply(--layout-flex);
+      }
+
+      .input-row > *:not(:first-child) {
+        margin-left: 8px;
+      }
+
+      .shop-select-label {
+        line-height: 20px;
+      }
+
+      .order-summary-row {
+        line-height: 24px;
+      }
+
+      .total-row {
+        font-weight: 500;
+        margin: 30px 0;
+      }
+
+      @media (max-width: 767px) {
+
+        .grid {
+          display: block;
+          margin-top: 0;
+        }
+
+        .grid > section:not(:first-child) {
+          margin-left: 0;
+        }
+
+      }
+
+    </style>
+
+    <firebase-auth
+        id="auth"
+        provider="email"
+        signed-in="{{signedIn}}"
+        user="{{user}}"
+        on-error="handleError">
+    </firebase-auth>
+     <!-- <paper-dialog modal opened="[[opened]]" entry-animation="scale-up-animation" exit-animation="scale-down-animation"> --> 
+
+
+    <!-- <div>
+      <h2 class="logo">PROJECTAGRAM</h2>
+      <paper-button class = "item google" on-tap="signIn" disabled="[[disabled]]" raised>
+      <iron-icon class = "iconsize" icon="account-circle"></iron-icon>
+      <span>Sign in with Google</span>
+      </paper-button>
+    </div> -->
+
+     <app-header role="navigation" id="header"  condenses reveals>
+      <app-toolbar>
+        <div class="logo" main-title><a href="/" aria-label="SHOP Home">PROJECTAGRAM</a></div>
+
+          
+
+      </app-toolbar>
+    </app-header> 
+    
+    <!-- <paper-button class = "google" on-tap="signIn" disabled="[[disabled]]" raised>
+      <iron-icon class = "iconsize" icon="account-circle"></iron-icon>
+      <span>Sign in with Google</span>
+    </paper-button> -->
+    <div class="main-frame">
+      <form
+              id="loginForm"
+              is="iron-form"
+              method="post"
+              action="/data/sample_success_response.json"
+              on-iron-form-response="_didReceiveResponse"
+              on-iron-form-presubmit="_willSendRequest">
+
+            <div class="grid">
+              <section>
+
+                <h1>Sign In</h1>
+
+                <div class="row input-row">
+                  <shop-input>
+                    <input type="email" id="accountEmail" name="accountEmail"
+                        placeholder="Email" autofocus required
+                        aria-labelledby="accountEmailLabel accountInfoHeading">
+                    <shop-md-decorator error-message="Invalid Email" aria-hidden="true">
+                      <label id="accountEmailLabel">Email</label>
+                      <shop-underline></shop-underline>
+                    </shop-md-decorator>
+                  </shop-input>
+                </div>
+                <div class="row input-row">
+                  <shop-input>
+                    <input type="password" id="accountPassword" name="accountPassword" 
+                        placeholder="Password" autofocus required
+                        aria-labelledby="accountPhoneLabel accountInfoHeading">
+                    <shop-md-decorator error-message="Invalid Password" aria-hidden="true">
+                      <label id="accountPasswordLabel">Password</label>
+                      <shop-underline></shop-underline>
+                    </shop-md-decorator>
+                  </shop-input>
+                </div>
+                
+              
+
+              <shop-button fullwidth responsive id="submitBox">
+                  <input class ="fullwidth" type="button" on-click="_submit" value="Sign In">
+                </shop-button>
+              
+              <p id="errmsg">[[loginerrormsg]]</p>  
+
+
+              </section>
+
+            </div>
+          </form>
+      </div>
+
+
+
+  <!-- </paper-dialog> -->
+  </template>
+  <script>
+    Polymer({
+      is: 'sa-login',
+
+      properties: {
+        disabled: {
+          type: Boolean,
+          reflectToAttribute: true,
+          value: false
+        },
+
+        signedIn: {
+          type: Boolean,
+          reflectToAttribute: true,
+          value: false
+        },
+
+        loginerrormsg: {
+          type: String,
+          reflectToAttribute: true,
+          value: ''
+        }
+
+      },
+
+      signIn: function() {
+        this.loginerrormsg='';
+        this.fire('sign-in', null, { bubbles: false });
+      },
+
+      _submit: function(e) {
+        if (this._validateForm()) {
+          // To send the form data to the server:
+          // 2) Remove the code below.
+          // 3) Uncomment `this.$.checkoutForm.submit()`.
+          
+          var current = this;
+          this.$.auth.signInWithEmailAndPassword(this.$.accountEmail.value, this.$.accountPassword.value).catch(function(error) {
+              var errorCode = error.code;
+              var errorMessage = error.message;
+
+              //this.loginerrormsg=''+errorMessage;
+              var text = error ? error.message : '';
+              current._unescapeText(text);
+
+              
+  // ...
+          });
+        }
+      },
+
+      _unescapeText: function(text) {
+        
+        var elem = document.createElement('textarea');
+        elem.innerHTML = text;
+        this.$.errmsg.innerHTML = elem.textContent;
+      },
+
+      _validateForm: function() {
+        var form = this.$.loginForm;
+        var firstInvalid = false;
+        this._unescapeText('Validating Email and Password... !!!');
+        for (var el, i = 0; el = form.elements[i], i < form.elements.length; i++) {
+          if (el.checkValidity()) {
+            el.removeAttribute('aria-invalid');
+          } else {
+            if (!firstInvalid) {
+              // announce error message
+              if (el.nextElementSibling) {
+                this.fire('announce', el.nextElementSibling.getAttribute('error-message'));
+              }
+              if (el.scrollIntoViewIfNeeded) {
+                // safari, chrome
+                el.scrollIntoViewIfNeeded();
+              } else {
+                // firefox, edge, ie
+                el.scrollIntoView(false);
+              }
+              el.focus();
+              firstInvalid = true;
+            }
+            el.setAttribute('aria-invalid', 'true');
+          }
+        }
+
+        return !firstInvalid;
+      }
+
+
+      /*attached: function() {
+        alert("onattached");
+        var setOpened = this.setOpened.bind(this);
+        firebase.auth().onAuthStateChanged(function(user) {
+          setOpened(user);
+        });
+      },
+      setOpened: function(user) {
+        if (user) {
+          this.set('opened', false);
+        } else {
+          this.set('opened', true);
+        }
+      },*/
+
+    });
+  </script>
+</dom-module>

@@ -1,0 +1,279 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+
+
+<link rel="import" href="shop-button.html">
+<link rel="import" href="shop-image.html">
+<link rel="import" href="file-upload.html">
+<link rel="import" href="shop-icons.html">
+<link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/cat-slider/cat-slider.html">
+<link rel="import" href="../bower_components/cat-image/cat-image.html">
+<link rel="import" href="../bower_components/cat-text/cat-text.html"> 
+
+<dom-module id="shop-home">
+
+  <template>
+
+    <style include="shop-button">
+
+      .image-link {
+        outline: none;
+      }
+
+      .image-link > shop-image::after {
+        display: block;
+        content: '';
+        position: absolute;
+        transition-property: opacity;
+        transition-duration: 0s;
+        transition-delay: 90ms;
+        pointer-events: none;
+        opacity: 0;
+        top: 5px;
+        left: 5px;
+        right: 5px;
+        bottom: 5px;
+        outline: #2196F3 auto 5px;
+        outline: -moz-mac-focusring auto 5px;
+        outline: -webkit-focus-ring-color auto 5px;
+      }
+
+      .image-link:focus > shop-image::after {
+        opacity: 1;
+      }
+
+      .item {
+        display: block;
+        text-decoration: none;
+        text-align: center;
+        /*margin-bottom: 40px;*/
+      }
+
+      /*.item:nth-of-type(3),
+      .item:nth-of-type(4) {
+        display: inline-block;
+        width: 50%;
+      }*/
+
+      shop-image {
+        position: relative;
+        height: 320px;
+        overflow: hidden;
+        --shop-image-img: {
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          width: 100%;
+          left: -9999px;
+          right: -9999px;
+          max-width: none;
+        };
+      }
+
+      h2 {
+        font-size: 1.3em;
+        font-weight: 500;
+        margin: 32px 0;
+      }
+
+      
+      .post {
+        margin: 5px;
+        padding: 5px;
+        border: 2px solid sandybrown;
+        width: 47.5%;
+        display: inline-block;
+      }
+
+      .post h2,h4 {
+        margin: 2px;
+        padding: 2px;
+        display: inline-flex;
+      }
+
+      .post h2 {
+        color: darkslateblue;
+      }
+
+      .post h4 {
+        float: right;
+      }
+
+      fancy-carousel{
+        width: 100%;
+        height: 400px;
+      }
+
+      cat-slider{
+        height: 500px;
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 40px;
+        z-index: 0;
+      }
+
+      paper-fab {
+        position: fixed;
+        right: 25px;
+        bottom: 30px;
+      }
+
+      @media (max-width: 767px) {
+        shop-image {
+          height: 240px;
+        }
+
+        fancy-carousel{
+          width: 100%;
+          height: 100%;
+        }
+
+        cat-slider{
+          width: 100%;
+          height: 300px;
+          margin-bottom: 40px;
+        }
+
+        h2 {
+          margin: 24px 0;
+        }
+
+        .item:nth-of-type(3) > shop-button > a,
+        .item:nth-of-type(4) > shop-button > a {
+          padding: 8px 24px;
+        }
+
+        .post {
+          width: 93%;
+        }
+        
+
+      }
+
+    </style>
+
+    <firebase-auth
+        id="auth"
+        provider="email"
+        signed-in="{{signedIn}}"
+        user="{{user}}"
+        on-error="handleError">
+    </firebase-auth>
+
+    <firebase-query
+      id="posts"
+      path="/posts"
+      order-by-child="_timestamp"
+      data="{{eventsdata}}">
+    </firebase-query>
+
+    <app-indexeddb-mirror
+        session="[[user.uid]]"
+        key="posts"
+        data="{{eventsdata}}"
+        persisted-data="{{data}}">
+    </app-indexeddb-mirror>
+
+
+    <!-- <template is="dom-repeat" items="[[_toArray(data)]]" as="post"> -->
+    <template is="dom-repeat" items="[[data]]" as="post">  
+      
+      <div class="post">
+
+        <h2>[[post.title]] - on - [[post.date]]</h2>
+        <h4>[[post.author]]</h4>
+        <hr>
+        <p>[[post.description]]</p>
+
+        <cat-slider sliderimages="[[_toArray(post.images)]]" keypath="[[_basePath(post.$key)]]">
+        </cat-slider>  
+        
+      </div>  
+        
+    </template>
+
+    <paper-fab title="Add Event" elevation="5" on-tap="newEvent" icon="add"></paper-fab>
+    
+
+  </template>
+
+  <script>
+
+    Polymer({
+
+      is: 'shop-home',
+
+      properties: {
+
+        /*categories: {
+          type: Array
+        },
+*/
+        visible: {
+          type: Boolean,
+          observer: '_visibleChanged'
+        }/*,
+
+        data: {
+                    type: Object,
+                    observer: '_onDataReceived'
+        }*/
+
+      },
+
+      _visibleChanged: function(visible) {
+        if (visible) {
+          this.fire('change-section', { title: 'Home' });
+        }
+      },
+
+      _computePath: function(key,imageurl){
+
+        return 'https://firebasestorage.googleapis.com/v0/b/note-app-firebase-5320d.appspot.com/o/posts%2F'+key+'%2F'+imageurl+'?alt=media';
+      },
+
+      _basePath: function(key){
+
+        return 'https://firebasestorage.googleapis.com/v0/b/note-app-firebase-5320d.appspot.com/o/posts%2F'+key+'%2F';
+      },
+
+      _toArray: function(obj) {
+          
+          if(obj){
+              return Object.keys(obj).map(function(key) {
+                  return {
+                      name: key,
+                      value: obj[key]
+                  };
+              });
+          }
+          else{
+            return null;
+          }
+
+        },
+
+      newEvent: function() {
+        this.set("route.path", "/addevent");
+      }   
+
+    });
+
+  </script>
+
+</dom-module>
