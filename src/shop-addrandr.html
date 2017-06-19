@@ -12,7 +12,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../bower_components/paper-item/paper-item-body.html">
-
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/effects/waterfall.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
 
@@ -39,6 +41,40 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       :host([waiting]) .main-frame {
         opacity: 0.1;
+      }
+
+      paper-icon-button {
+        color: var(--app-primary-color);
+      }
+
+      .logo {
+        text-align: center;
+      }
+
+      .logo a {
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 0.3em;
+        color: var(--app-white-color);
+        text-decoration: none;
+        /* required for IE 11, so this <a> can receive pointer events */
+        display: inline-block;
+        pointer-events: auto;
+      }
+
+      .left-bar-item {
+        width: 40px;
+      }
+
+      app-header {
+        @apply(--layout-fixed-top);
+        z-index: 1;
+        background-color: #1976D2;
+        --app-header-shadow: {
+          box-shadow: inset 0px 5px 6px -3px rgba(0, 0, 0, 0.2);
+          height: 10px;
+          bottom: -10px;
+        };
       }
 
       shop-input, shop-select {
@@ -69,16 +105,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         margin-bottom: 5px;
         -webkit-appearance:none;
         appearance:none;
-      }
-
-      .billing-address-picker {
-        margin: 28px 0;
-        height: 20px;
-        @apply(--layout-horizontal);
-      }
-
-      .billing-address-picker > label {
-        margin-left: 12px;
       }
 
       .grid {
@@ -118,10 +144,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       .shop-select-label {
         line-height: 20px;
-      }
-
-      .order-summary-row {
-        line-height: 24px;
       }
 
       .total-row {
@@ -228,6 +250,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         persisted-data="{{users}}">
     </app-indexeddb-mirror>
 
+    <app-header role="navigation" id="header" effects="waterfall" hidden="[[!signedin]]" condenses reveals>
+      <app-toolbar>
+        <div class="left-bar-item">
+          <paper-icon-button
+              class="menu-btn"
+              icon="menu"
+              on-click="_toggleDrawer"
+              aria-label="Categories">
+          </paper-icon-button>
+        </div>
+        <div class="logo" main-title><a href="#/" aria-label="SHOP Home">PROJECTAGRAM</a></div> 
+      </app-toolbar>
+    </app-header>
 
     <div class="main-frame">
       <iron-pages selected="[[state]]" attr-for-selected="state">
@@ -359,8 +394,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <vaadin-combo-box id="elementsbox" items="[[_toArrayUsers(users)]]" item-value-path="name" item-label-path="fullname" on-selected-item-changed="_itemselectedchanged">
                   <template>
                   <paper-icon-item style="padding: 0">
-                  <!-- <img src="[[_computeImg(item.name)]]" item-icon class="papericonitemimg"> -->
-                  <!-- <img src="[[_computeImg(item.name)]]" style="border-radius: 50%; width: 48px; height: 48px;" item-icon> -->
                   <paper-item-body two-line style="min-height: 0">
                   <div style="text-transform: capitalize">[[item.fullname]]</div>
                   <div secondary>[[item.email]]</div>
@@ -386,10 +419,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </div>
               </shop-input>  
             </div>
-                <!-- <shop-button responsive id="submitBox">
-                  <input type="button" on-click="_submit" value="Add User">
-                </shop-button> -->
-
               </section>    
                 
                 
@@ -458,20 +487,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           notify: true
         },
 
-        /**
-         * The total price of the contents in the user's cart.
-         */
-        total: Number,
-
-        /**
-       * `files` is the list of files to be uploaded
-       */
-        userslist: Object,
-
-        /**
-         * The state of the form. Valid values are:
-         * `init`, `success` and `error`.
-         */
         state: {
           type: String,
           value: 'init'
@@ -518,6 +533,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           reflectToAttribute: true
         }
 
+      },
+
+      _toggleDrawer: function(){
+        this.fire('toggle-drawer', null);
       },
 
       _submit: function(e) {
@@ -719,10 +738,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _itemselectedchanged: function(e) {
-        console.log('_itemselectedchanged');
-        console.log(e);
-        console.log(e.detail);
-
         if( e.detail &&  e.detail.value != null){
 
           var winner = e.detail.value;
@@ -761,12 +776,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     email: obj[key].emailId
                 };
             });
-      },
-
-      
-
-      _computeImg: function(teamName) {
-            return teamName ? 'https://firebasestorage.googleapis.com/v0/b/note-app-firebase-5320d.appspot.com/o/users%2F'+teamName+'.jpg?alt=media' : '';
       }
 
 

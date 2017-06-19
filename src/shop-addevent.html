@@ -12,7 +12,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
-
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/effects/waterfall.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="shop-button.html">
@@ -25,7 +27,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="../bower_components/file-upload/file-upload-icons.html">
-<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 
@@ -40,6 +41,40 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       :host([waiting]) .main-frame {
         opacity: 0.1;
+      }
+
+      paper-icon-button {
+        color: var(--app-primary-color);
+      }
+
+      .logo {
+        text-align: center;
+      }
+
+      .logo a {
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 0.3em;
+        color: var(--app-white-color);
+        text-decoration: none;
+        /* required for IE 11, so this <a> can receive pointer events */
+        display: inline-block;
+        pointer-events: auto;
+      }
+
+      .left-bar-item {
+        width: 40px;
+      }
+
+      app-header {
+        @apply(--layout-fixed-top);
+        z-index: 1;
+        background-color: #1976D2;
+        --app-header-shadow: {
+          box-shadow: inset 0px 5px 6px -3px rgba(0, 0, 0, 0.2);
+          height: 10px;
+          bottom: -10px;
+        };
       }
 
       shop-input, shop-select {
@@ -61,16 +96,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         margin-bottom: 5px;
         -webkit-appearance:none;
         appearance:none;
-      }
-
-      .billing-address-picker {
-        margin: 28px 0;
-        height: 20px;
-        @apply(--layout-horizontal);
-      }
-
-      .billing-address-picker > label {
-        margin-left: 12px;
       }
 
       .grid {
@@ -231,6 +256,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       path="/users/[[user.uid]]"
       data="{{userprofile}}">
     </firebase-document>
+
+    <app-header role="navigation" id="header" effects="waterfall" hidden="[[!signedin]]" condenses reveals>
+      <app-toolbar>
+        <div class="left-bar-item">
+          <paper-icon-button
+              class="menu-btn"
+              icon="menu"
+              on-click="_toggleDrawer"
+              aria-label="Categories">
+          </paper-icon-button>
+        </div>
+        <div class="logo" main-title><a href="#/" aria-label="SHOP Home">PROJECTAGRAM</a></div> 
+      </app-toolbar>
+    </app-header>
 
     <div class="main-frame">
       <iron-pages selected="[[state]]" attr-for-selected="state">
@@ -497,12 +536,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         type: Boolean,
         value: true
       },
-
-      uploadkey: {
-        type: String,
-        value: ''
-      },
-
       /**
        * `files` is the list of files to be uploaded
        */
@@ -514,25 +547,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      /**
-       * `method` is the http method to be used during upload
-       */
-      method: {
-        type: String,
-        value: 'PUT'
-      },
-
-      /**
-       * `withCredentials` indicates whether or not use xhr's withCredentials on upload
-       */
-      withCredentials: {
-        type: Boolean,
-        value: false
-      },
-
-      /**
-       * `raised` indicates whether or not the button should be raised
-        */
       raised: {
         type: Boolean,
         value: true
@@ -546,17 +560,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         value: false
       },
 
-      /**
-       * `headers` is a key value map of header names and values
-       */
-      headers: {
-        type: Object,
-        value: {},
-      },
-
-      /**
-       * `retryText` is the text for the tooltip to retry an upload
-       */
       retryText: {
         type: String,
         value: 'Retry Upload'
@@ -639,6 +642,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       },
 
+      _toggleDrawer: function(){
+        this.fire('toggle-drawer', null);
+      },
+
       _submit: function(e) {
         if (this._validateForm()) {
           // To send the form data to the server:
@@ -651,12 +658,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           //var key = app.database().ref('events/').push();
           var _timestamp = -1*Date.now();
 
+          var file  = this.files[0];
+          
+
+
           var postData = {
               author: this.userprofile.name,
               uid: this.user.uid,
               description: this.$.eventDes.value,
               title: this.$.eventTitle.value,
               date: this.$.date.value,
+              firstimage : file.name,
               _timestamp: _timestamp
           };
 
@@ -807,25 +819,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      _toggleBillingAddress: function(e) {
-        this.hasBillingAddress = e.target.checked;
-
-        if (this.hasBillingAddress) {
-          this.$.billAddress.focus();
-        }
-      },
-
       _computeHasItemRe: function(cartLength) {
         //return cartLength > 0;
         return true;
-      },
-
-      _formatPrice: function(total) {
-        return isNaN(total) ? '' : '$' + total.toFixed(2);
-      },
-
-      _getEntryTotal: function(entry) {
-        return this._formatPrice(entry.quantity * entry.item.price);
       },
 
       _visibleChanged: function(visible) {
@@ -1079,52 +1075,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               );
         },
 
-     uploadFileToServer: function(file,keypost) {
-      if (!file) {
-        return;
-      }
-      this.fire('before-upload');
-      this._showDropText();
-      var prefix = 'files.' + this.files.indexOf(file);
-      var self = this;
-
-      var app = this.$.auth.app;
-              
-      var dest = '';
-              //dest = 'users/'+file.name;
-      dest = 'posts/'+keypost+'/'+file.name;
-      var fbsImageRef = app.storage().ref(dest);
-      var monitor = fbsImageRef.put(file);
-
-      var current = this;
-        //update progress
-              monitor.on('state_changed',
-                function progress(snapshot){
-                  //prog.value = 100 * (snapshot.bytesTransferred / snapshot.totalBytes);
-                  var prog = 100 * (snapshot.bytesTransferred / snapshot.totalBytes);
-                  self.set(prefix + '.progress', prog);  
-                },
-                function error(err){
-                  self.set(prefix + '.error', true);
-                  self.set(prefix + '.complete', false);
-                  self.set(prefix + '.progress', 100);
-                  self.updateStyles();
-                  
-              },
-                function complete(){
-
-                  self.set(prefix + '.complete', true); 
-
-                  var app = current.$.auth.app;
-                  // Get a key for a new Post.
-                  var x = file.name;
-                  x = x.replace(/\.[^/.]+$/, "");
-                  app.database().ref().child('posts/'+keypost+'/images/'+x).set(file.name);
-                  app.database().ref().child('/user-posts/' + current.user.uid + '/'+keypost+'/images/'+x).set(file.name);
-                }
-              );
-        },
-
     uploadFileToServerTest: function(file,keypost) {
       if (!file) {
         return;
@@ -1134,7 +1084,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       var self = this;
       this.resizeImage({
           file: file,
-          maxSize: 1500
+          maxSize: 1200
       }).then(function (resizedImage) {
 
           current.fire('before-upload');
@@ -1144,7 +1094,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           var app = current.$.auth.app;
           var dest = '';
-              //dest = 'users/'+file.name;
           dest = 'posts/'+keypost+'/'+file.name;
           var fbsImageRef = app.storage().ref(dest);
           var monitor = fbsImageRef.put(resizedImage);  

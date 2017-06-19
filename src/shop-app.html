@@ -1,15 +1,4 @@
-<!--
-@license
-Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
--->
 
-<!-- <link rel="import" href="../bower_components/polymerfire/polymerfire.html"> -->
-<!-- <link rel="import" href="ss-fire.html"> -->
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-scroll-effects/effects/waterfall.html">
@@ -64,6 +53,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         };
       }
 
+      .account h3 a{
+        color: var(--app-white-color);
+        text-decoration: none;
+        pointer-events: auto;
+      }
+
       paper-icon-button {
         color: var(--app-primary-color);
       }
@@ -96,11 +91,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           display: none;
       }
 
-      .cart-btn-container {
-        position: relative;
-        width: 40px;
-      }
-
       .announcer {
         position: fixed;
         height: 0;
@@ -120,30 +110,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         height: 66px;
       }
 
-
-      .cart-badge {
-        position: absolute;
-        top: -2px;
-        right: 0;
-        width: 20px;
-        height: 20px;
-        background-color: var(--app-accent-color);
-        border-radius: 50%;
-        color: white;
-        font-size: 12px;
-        font-weight: 500;
-        pointer-events: none;
-        @apply(--layout-vertical);
-        @apply(--layout-center-center);
-      }
-
-      /*.drawer-list {
-        margin: 0 20px;
-        
-      }*/
-
       
-
       .drawer-list a {
         display: block;
         padding: 0 16px;
@@ -173,6 +140,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       iron-pages {
         max-width: 1440px;
         margin: 0 auto;
+        margin-top: 64px;
       }
 
       footer {
@@ -283,28 +251,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     
     <iron-media-query query="max-width: 767px" query-matches="{{smallScreen}}"></iron-media-query>
     
-    <app-header role="navigation" id="header" effects="waterfall" hidden="[[!signedIn]]" condenses reveals>
-      <app-toolbar>
-        <div class="left-bar-item">
-          <paper-icon-button
-              class="menu-btn"
-              icon="menu"
-              on-click="_toggleDrawer"
-              aria-label="Categories">
-          </paper-icon-button>
-            <a class="back-btn" href="javascript:history.back()" tabindex="-1">
-            <paper-icon-button icon="arrow-back" aria-label="Go back"></paper-icon-button>
-          </a>
-        </div>
-        <div class="logo" main-title><a href="#/" aria-label="SHOP Home">PROJECTAGRAM</a></div> 
-      </app-toolbar>
-    </app-header>
-
     <app-drawer opened="{{drawerOpened}}" swipe-open tabindex="0" hidden="[[!signedIn]]">
         <div class="account">
 
-          <img draggable="false" src="[[_computeImages(user.uid)]]">
-          <h3>[[userprofile.name]]</h3>
+          <a href="#/detail/[[user.uid]]"><img draggable="false" src="[[_computeImages(user.uid)]]"></a>
+          <h3><a href="#/detail/[[user.uid]]">[[userprofile.name]]</a></h3>
         </div>
         <iron-selector role="navigation" class="drawer-list" selected="[[page]]" attr-for-selected="name">
             <a name="home" href="#/home">Home<hr/></a>
@@ -318,24 +269,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <iron-pages role="main" selected="[[page]]" attr-for-selected="name" selected-attribute="visible" fallback-selection="404" hidden="[[!signedIn]]">
       <!-- home view -->
-      <shop-home name="home" route="{{route}}"></shop-home>
+      <shop-home name="home" route="{{route}}" signedin="[[signedIn]]"></shop-home>
 
-      <shop-teams name="teams" user="[[user]]" categories="[[categories]]"></shop-teams>
+      <shop-teams name="teams" user="[[user]]" signedin="[[signedIn]]"></shop-teams>
       <!-- list view of items in a category -->
-      <shop-rewards name="rewards" route="{{route}}" user="[[user]]" offline="[[offline]]"></shop-rewards>
+      <shop-rewards name="rewards" route="{{route}}" user="[[user]]" offline="[[offline]]" signedin="[[signedIn]]"></shop-rewards>
 
-      <shop-rewardslist name="rewardslist" route="[[subroute]]" user="[[user]]" offline="[[offline]]"></shop-rewardslist>
+      <shop-rewardslist name="rewardslist" route="[[subroute]]" user="[[user]]" offline="[[offline]]" signedin="[[signedIn]]"></shop-rewardslist>
 
-      <shop-list name="list" page="[[page]]" route="[[subroute]]" user="[[user]]" offline="[[offline]]"></shop-list>
+      <shop-list name="list" page="[[page]]" route="[[subroute]]" user="[[user]]" offline="[[offline]]" signedin="[[signedIn]]"></shop-list>
 
       <!-- detail view of one item -->
-      <shop-detail name="detail" route="[[subroute]]" user="[[user]]"  offline="[[offline]]"></shop-detail>
+      <shop-detail name="detail" route="[[subroute]]" user="[[user]]"  offline="[[offline]]" signedin="[[signedIn]]"></shop-detail>
       <!-- cart view -->
       
-      <shop-adduser name="adduser" cart="[[cart]]" total="[[total]]" route="{{subroute}}"></shop-adduser>
-      <shop-addevent name="addevent" cart="[[cart]]" total="[[total]]" route="{{subroute}}"></shop-addevent>
+      <shop-adduser name="adduser"  route="{{subroute}}" signedin="[[signedIn]]"></shop-adduser>
+      <shop-addevent name="addevent" route="{{subroute}}" signedin="[[signedIn]]"></shop-addevent>
 
-      <shop-addrandr name="addrandr" route="{{subroute}}"></shop-addrandr>
+      <shop-viewevent name="viewevent" route="{{subroute}}" signedin="[[signedIn]]"></shop-viewevent>
+
+      <shop-addrandr name="addrandr" route="{{subroute}}" signedin="[[signedIn]]"></shop-addrandr>
 
       
 
@@ -355,17 +308,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       is: 'shop-app',
 
-        signIn() {
-          /*this.$.auth.signInWithPopup();*/
-        },
 
       properties: {
-
-        signedIn: {
-          type: Boolean,
-          reflectToAttribute: true,
-          value: false
-        },
 
         page: {
           type: String,
@@ -394,18 +338,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Number,
           value: 0
         },
-
-        _shouldShowTabs: {
-          computed: '_computeShouldShowTabs(page, smallScreen)'
-        },
-
-        _shouldRenderTabs: {
-          computed: '_computeShouldRenderTabs(_shouldShowTabs, loadComplete)'
-        },
-
-        _shouldRenderDrawer: {
-          computed: '_computeShouldRenderDrawer(smallScreen, loadComplete)'
-        }
       },
 
       observers: [
@@ -416,6 +348,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         'change-section': '_onChangeSection',
         'announce': '_onAnnounce',
         'dom-change': '_domChange',
+        'toggle-drawer': '_toggleDrawer',
         'show-invalid-url-warning': '_onFallbackSelectionTriggered'
       },
 
@@ -491,9 +424,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (shouldResetLayout) {
           // The size of the header depends on the page (e.g. on some pages the tabs
           // do not appear), so reset the header's layout only when switching pages.
-          this.async(function() {
+          /*this.async(function() {
             this.$.header.resetLayout();
-          }, 1);
+          }, 1);*/
         }
       },
 
@@ -585,23 +518,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _onFallbackSelectionTriggered: function() {
         this.page = '404-warning';
       },
-
-      _computeShouldShowTabs: function(page, smallScreen) {
-        return (page === 'home' || page === 'list' || page === 'detail') && !smallScreen;
-      },
-
-      _computeShouldRenderTabs: function(_shouldShowTabs, loadComplete) {
-        return _shouldShowTabs && loadComplete;
-      },
-
-      _computeShouldRenderDrawer: function(smallScreen, loadComplete) {
-        return smallScreen && loadComplete;
-      },
-
-      _computePluralizedQuantity: function(quantity) {
-        return quantity + ' ' + (quantity === 1 ? 'item' : 'items');
-      },
-
+      
       _computeImages: function(teamName) {
             return teamName ? "https://firebasestorage.googleapis.com/v0/b/note-app-firebase-5320d.appspot.com/o/users%2F"+teamName+".jpg?alt=media" : '';
       }

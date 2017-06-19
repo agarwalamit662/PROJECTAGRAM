@@ -9,29 +9,74 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
-
-
-<link rel="import" href="shop-button.html">
-<link rel="import" href="shop-image.html">
-<link rel="import" href="file-upload.html">
 <link rel="import" href="shop-icons.html">
+<link rel="import" href="shop-imagediv.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/effects/waterfall.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-fab/paper-fab.html">
-<link rel="import" href="../bower_components/cat-slider/cat-slider.html">
-<link rel="import" href="../bower_components/cat-image/cat-image.html">
-<link rel="import" href="../bower_components/cat-text/cat-text.html"> 
-
+<link rel="import" href="../bower_components/vaadin-combo-box/vaadin-combo-box.html">
 <dom-module id="shop-home">
 
   <template>
 
-    <style include="shop-button">
+    <style>
 
       .image-link {
         outline: none;
+      }
+
+      paper-icon-button {
+        color: var(--app-primary-color);
+      }
+
+      .logo {
+        text-align: center;
+      }
+
+      .logo a {
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 0.3em;
+        color: var(--app-white-color);
+        text-decoration: none;
+        /* required for IE 11, so this <a> can receive pointer events */
+        display: inline-block;
+        pointer-events: auto;
+      }
+
+      .left-bar-item {
+        width: 40px;
+      }
+
+      app-header {
+        @apply(--layout-fixed-top);
+        z-index: 1;
+        height: 80px;
+        background-color: #1976D2;
+        --app-header-shadow: {
+          box-shadow: inset 0px 5px 6px -3px rgba(0, 0, 0, 0.2);
+          height: 10px;
+          bottom: -10px;
+        };
+      }
+
+      app-header app-toolbar{
+        height: 80px; 
+      }
+
+      app-header app-toolbar vaadin-combo-box {
+        width: 30%;
+        padding: 10px;
+        --vaadin-combo-box-paper-input-container:{
+          background: white;
+          border-radius: 10px;
+          padding-left: 10px;
+        }
       }
 
       .image-link > shop-image::after {
@@ -69,11 +114,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         width: 50%;
       }*/
 
-      shop-image {
+      shop-imagediv {
         position: relative;
         height: 320px;
         overflow: hidden;
-        --shop-image-img: {
+        --shop-imagediv-img: {
           position: absolute;
           top: 0;
           bottom: 0;
@@ -84,49 +129,56 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         };
       }
 
+
+      vaadin-combo-box {
+        --vaadin-combo-box-paper-input-container{
+          background: white;
+          border-radius: 10px;
+          padding-left: 10px;
+        }
+      }
+
       h2 {
         font-size: 1.3em;
         font-weight: 500;
         margin: 32px 0;
       }
 
+      .postouter{
+        margin-top: 85px;
+      }
       
       .post {
         margin: 5px;
         padding: 5px;
-        border: 2px solid sandybrown;
         width: 47.5%;
         display: inline-block;
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+                    0 1px 5px 0 rgba(0, 0, 0, 0.12),
+                    0 3px 1px -2px rgba(0, 0, 0, 0.2);
       }
 
       .post h2,h4 {
         margin: 2px;
         padding: 2px;
-        display: inline-flex;
       }
 
       .post h2 {
         color: darkslateblue;
       }
 
-      .post h4 {
-        float: right;
+      .post h2 a{
+            color: darkslateblue;
+            text-decoration: none;
+            pointer-events: auto;
       }
 
-      fancy-carousel{
-        width: 100%;
-        height: 400px;
+      .post h4 a{
+            text-decoration: none;
+            pointer-events: auto;
+            color: black;
       }
-
-      cat-slider{
-        height: 500px;
-        width: 100%;
-        margin-left: auto;
-        margin-right: auto;
-        margin-bottom: 40px;
-        z-index: 0;
-      }
-
+      
       paper-fab {
         position: fixed;
         right: 25px;
@@ -134,29 +186,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       @media (max-width: 767px) {
-        shop-image {
-          height: 240px;
-        }
-
-        fancy-carousel{
-          width: 100%;
-          height: 100%;
-        }
-
-        cat-slider{
-          width: 100%;
+        shop-imagediv {
           height: 300px;
-          margin-bottom: 40px;
+        }
+
+        app-header app-toolbar vaadin-combo-box {
+          width: 60%;
         }
 
         h2 {
           margin: 24px 0;
         }
 
-        .item:nth-of-type(3) > shop-button > a,
-        .item:nth-of-type(4) > shop-button > a {
-          padding: 8px 24px;
-        }
+        
 
         .post {
           width: 93%;
@@ -182,6 +224,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       data="{{eventsdata}}">
     </firebase-query>
 
+    <firebase-document
+      path="/users"
+      data="{{users}}">
+    </firebase-document>
+
     <app-indexeddb-mirror
         session="[[user.uid]]"
         key="posts"
@@ -189,24 +236,47 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         persisted-data="{{data}}">
     </app-indexeddb-mirror>
 
+    <app-header role="navigation" id="header" effects="waterfall" hidden="[[!signedin]]" condenses reveals>
+      <app-toolbar>
+        <div class="left-bar-item">
+          <paper-icon-button
+              class="menu-btn"
+              icon="menu"
+              on-click="_toggleDrawer"
+              aria-label="Categories">
+          </paper-icon-button>
+        </div>
+        <!-- <div class="logo" main-title><a href="#/" aria-label="SHOP Home">PROJECTAGRAM</a></div>  -->
+        <vaadin-combo-box id="elementsbox" items="[[_toArrayUsers(users)]]" item-value-path="name" item-label-path="fullname" on-selected-item-changed="_itemselectedchanged">
+                  <template>
+                  <paper-icon-item style="padding: 0">
+                  <paper-item-body two-line style="min-height: 0">
+                  <div style="text-transform: capitalize">[[item.fullname]]</div>
+                  <div secondary>[[item.email]]</div>
+                  </paper-item-body>
+                  </paper-icon-item>
+                  </template>
+                </vaadin-combo-box>
+      </app-toolbar>
+    </app-header>
 
     <!-- <template is="dom-repeat" items="[[_toArray(data)]]" as="post"> -->
+    <div class = "postouter">
     <template is="dom-repeat" items="[[data]]" as="post">  
       
       <div class="post">
 
-        <h2>[[post.title]] - on - [[post.date]]</h2>
-        <h4>[[post.author]]</h4>
+        <h2><a href="#/viewevent/[[post.$key]]">[[post.title]] - on - [[post.date]]</a></h2>
+        <h4><a href="#/detail/[[post.uid]]">[[post.author]]</a></h4>
         <hr>
         <p>[[post.description]]</p>
 
-        <cat-slider sliderimages="[[_toArray(post.images)]]" keypath="[[_basePath(post.$key)]]">
-        </cat-slider>  
+        <a href="#/viewevent/[[post.$key]]"><shop-imagediv src="[[_computePath(post.$key,post.firstimage)]]" alt="[[post.title]]"></shop-imagediv></a>  
         
       </div>  
         
     </template>
-
+    </div>
     <paper-fab title="Add Event" elevation="5" on-tap="newEvent" icon="add"></paper-fab>
     
 
@@ -220,20 +290,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       properties: {
 
-        /*categories: {
-          type: Array
-        },
-*/
         visible: {
           type: Boolean,
           observer: '_visibleChanged'
-        }/*,
-
-        data: {
-                    type: Object,
-                    observer: '_onDataReceived'
-        }*/
-
+        }
       },
 
       _visibleChanged: function(visible) {
@@ -245,11 +305,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       _computePath: function(key,imageurl){
 
         return 'https://firebasestorage.googleapis.com/v0/b/note-app-firebase-5320d.appspot.com/o/posts%2F'+key+'%2F'+imageurl+'?alt=media';
-      },
-
-      _basePath: function(key){
-
-        return 'https://firebasestorage.googleapis.com/v0/b/note-app-firebase-5320d.appspot.com/o/posts%2F'+key+'%2F';
       },
 
       _toArray: function(obj) {
@@ -268,9 +323,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         },
 
+        _toggleDrawer: function(){
+        this.fire('toggle-drawer', null);
+      },
+
       newEvent: function() {
         this.set("route.path", "/addevent");
-      }   
+      },
+
+      _toArrayUsers: function(obj) {
+            return Object.keys(obj).map(function(key) {
+                return {
+                    name: key,
+                    fullname: obj[key].name, 
+                    email: obj[key].emailId,
+                    routepath: '/detail/'+key
+                };
+            });
+      },
+
+      _itemselectedchanged: function(e) {
+        if( e.detail &&  e.detail.value != null){
+
+          var winner = e.detail.value;
+          this.set("route.path", winner.routepath);
+        }
+      }
 
     });
 

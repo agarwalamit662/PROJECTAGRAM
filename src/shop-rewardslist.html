@@ -14,6 +14,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="shop-common-styles.html">
 <link rel="import" href="shop-image.html">
 <link rel="import" href="shop-list-item.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/effects/waterfall.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
@@ -29,6 +32,40 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         height: 320px;
         overflow: hidden;
         margin-bottom: 32px;
+      }
+
+      paper-icon-button {
+        color: var(--app-primary-color);
+      }
+
+      .logo {
+        text-align: center;
+      }
+
+      .logo a {
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 0.3em;
+        color: var(--app-white-color);
+        text-decoration: none;
+        /* required for IE 11, so this <a> can receive pointer events */
+        display: inline-block;
+        pointer-events: auto;
+      }
+
+      .left-bar-item {
+        width: 40px;
+      }
+
+      app-header {
+        @apply(--layout-fixed-top);
+        z-index: 1;
+        background-color: #1976D2;
+        --app-header-shadow: {
+          box-shadow: inset 0px 5px 6px -3px rgba(0, 0, 0, 0.2);
+          height: 10px;
+          bottom: -10px;
+        };
       }
 
       .hero-image {
@@ -139,6 +176,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         spanvalue="[[category.date]]" spandetail="[[category.discussion]]"
         ></shop-image> -->
 
+    <app-header role="navigation" id="header" effects="waterfall" hidden="[[!signedin]]" condenses reveals>
+      <app-toolbar>
+        <div class="left-bar-item">
+          <paper-icon-button
+              class="menu-btn"
+              icon="menu"
+              on-click="_toggleDrawer"
+              aria-label="Categories">
+          </paper-icon-button>
+        </div>
+        <div class="logo" main-title><a href="#/" aria-label="SHOP Home">PROJECTAGRAM</a></div> 
+      </app-toolbar>
+    </app-header>    
+
     <div class = "rewardslist">
 
       <span class="price">[[category.date]]</span>
@@ -229,6 +280,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
         var pluralizedQ = quantity === 1 ? 'item' : 'items';
         return  '(' + quantity + ' ' + pluralizedQ + ')';
+      },
+
+      _toggleDrawer: function(){
+        this.fire('toggle-drawer', null);
       },
 
       _categoryChanged: function(category, visible) {

@@ -74,7 +74,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     </style>
 
-    <shop-image src="../images/empty_image.jpg" alt="[[item.title]]" spanreq = "[[spanreq]]"  spanvaluerew="[[item.title]]"></shop-image>
+    <shop-image src="[[_computeImg(src)]]" alt="[[item.title]]" spanreq = "[[spanreq]]"  spanvaluerew="[[item.title]]"></shop-image>
     <!-- <span class="price">[[item.name]]</span> -->
     
 
@@ -88,22 +88,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       properties: {
 
-        item: Object,
-
-        spanreq: {
-          type: Boolean,
-          reflectToAttribute: true,
-          value: true
-        },
+        item: Object
 
       },
 
-      _formatPrice: function(price) {
-        return price ? '$' + price.toFixed(2) : '';
-      },
+      _computeImg: function(src) {
 
-      _computeImg: function(teamName) {
-            return teamName ? 'https://firebasestorage.googleapis.com/v0/b/note-app-firebase-5320d.appspot.com/o/users%2F'+teamName+'.jpg?alt=media' : '';
+            var which = src % 9;
+
+            return '../images/'+which+'.jpg';
       }
 
 

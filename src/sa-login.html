@@ -191,16 +191,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         user="{{user}}"
         on-error="handleError">
     </firebase-auth>
-     <!-- <paper-dialog modal opened="[[opened]]" entry-animation="scale-up-animation" exit-animation="scale-down-animation"> --> 
-
-
-    <!-- <div>
-      <h2 class="logo">PROJECTAGRAM</h2>
-      <paper-button class = "item google" on-tap="signIn" disabled="[[disabled]]" raised>
-      <iron-icon class = "iconsize" icon="account-circle"></iron-icon>
-      <span>Sign in with Google</span>
-      </paper-button>
-    </div> -->
 
      <app-header role="navigation" id="header"  condenses reveals>
       <app-toolbar>
@@ -211,10 +201,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </app-toolbar>
     </app-header> 
     
-    <!-- <paper-button class = "google" on-tap="signIn" disabled="[[disabled]]" raised>
-      <iron-icon class = "iconsize" icon="account-circle"></iron-icon>
-      <span>Sign in with Google</span>
-    </paper-button> -->
     <div class="main-frame">
       <form
               id="loginForm"
@@ -296,11 +282,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       },
 
-      signIn: function() {
-        this.loginerrormsg='';
-        this.fire('sign-in', null, { bubbles: false });
-      },
-
       _submit: function(e) {
         if (this._validateForm()) {
           // To send the form data to the server:
@@ -358,22 +339,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         return !firstInvalid;
       }
-
-
-      /*attached: function() {
-        alert("onattached");
-        var setOpened = this.setOpened.bind(this);
-        firebase.auth().onAuthStateChanged(function(user) {
-          setOpened(user);
-        });
-      },
-      setOpened: function(user) {
-        if (user) {
-          this.set('opened', false);
-        } else {
-          this.set('opened', true);
-        }
-      },*/
 
     });
   </script>

@@ -16,6 +16,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="shop-list-item.html">
 <link rel="import" href="shop-tabs.html">
 <link rel="import" href="shop-tab.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/effects/waterfall.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
@@ -31,6 +34,40 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         height: 320px;
         overflow: hidden;
         margin-bottom: 32px;
+      }
+
+      paper-icon-button {
+        color: var(--app-primary-color);
+      }
+
+      .logo {
+        text-align: center;
+      }
+
+      .logo a {
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 0.3em;
+        color: var(--app-white-color);
+        text-decoration: none;
+        /* required for IE 11, so this <a> can receive pointer events */
+        display: inline-block;
+        pointer-events: auto;
+      }
+
+      .left-bar-item {
+        width: 40px;
+      }
+
+      app-header {
+        @apply(--layout-fixed-top);
+        z-index: 1;
+        background-color: #1976D2;
+        --app-header-shadow: {
+          box-shadow: inset 0px 5px 6px -3px rgba(0, 0, 0, 0.2);
+          height: 10px;
+          bottom: -10px;
+        };
       }
 
       .main-frame {
@@ -144,8 +181,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         persisted-data="{{category}}">
     </app-indexeddb-mirror>
 
-          <!-- Lazy-create the tabs for larger screen sizes. -->
-    <div id="tabContainer" sticky$="[[_shouldShowTabs]]">
+    <app-header role="navigation" id="header" effects="waterfall" hidden="[[!signedin]]" condenses reveals>
+      <app-toolbar>
+        <div class="left-bar-item">
+          <paper-icon-button
+              class="menu-btn"
+              icon="menu"
+              on-click="_toggleDrawer"
+              aria-label="Categories">
+          </paper-icon-button>
+        </div>
+        <div class="logo" main-title><a href="#/" aria-label="SHOP Home">PROJECTAGRAM</a></div> 
+      </app-toolbar>
+      <div id="tabContainer" sticky$="[[_shouldShowTabs]]">
         <shop-tabs
                 selected="[[categoryName]]"
                 attr-for-selected="name">
@@ -165,13 +213,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </dom-repeat> -->
             </shop-tabs>
     </div>
+    </app-header>
+
+          <!-- Lazy-create the tabs for larger screen sizes. -->
+    
 
 
-    <!-- <shop-image
-        alt="[[category.title]]"
-        src="[[_computeImg(category.name,visible)]]"
-        placeholder-img="[[category.placeholder]]" class="hero-image"></shop-image> -->
-
+    <div style="margin-top:130px;">
     <shop-image
         alt="[[category.title]]"
         src="[[teamName]]"
@@ -223,7 +271,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
      </iron-pages>
    </div>
-
+ </div>
 
   <!-- </template> -->
   </template>
@@ -289,13 +337,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       ],
 
       _routeChanged: function(route){
-        console.log('in _routeChanged');
-        console.log(route);
+        
         if(route && route.prefix == '/list'){
           this.categoryName = 'members';
           
         }
-        console.log('in _routeChanged end');
 
       },
 
@@ -315,18 +361,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         //var args = Polymer.dom(e).path[1].getAttribute('data-args');
 
         var args = e.target.dataset.args.split(',');
-        console.log('args');
-        console.log(args);
-        console.log('args');
-
-                //alert(args[0] + args[1]);
-
-        console.log('in changeState');
-        console.log(args[0]);
-        console.log('in changeState');
-
         this.categoryName = args[0];
-        //this.set('route.path', state);
         var scrollTop = 0;
         Polymer.AppLayout.scroll({ top: scrollTop, behavior: 'silent' });
       },
@@ -352,11 +387,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             this.fire('show-invalid-url-warning');
           } else {
 
-            console.log('category name');
-          console.log(category);
-          console.log('this.category name');
-          console.log(this.category);
-          console.log('category name end');
           this.teamName = category.name ? 'https://firebasestorage.googleapis.com/v0/b/note-app-firebase-5320d.appspot.com/o/teams%2F'+category.name+'.png?alt=media' : '';
 
             this.debounce('change-section', function() {
@@ -368,6 +398,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             });
           }
         }
+      },
+      
+      _toggleDrawer: function(){
+        this.fire('toggle-drawer', null);
       },
 
       _tryReconnect: function() {
@@ -388,21 +422,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             return true;
           }
           else return false;
-        },
-
-      _computeImg: function(teamName,visible) {
-
-          console.log('_computeImg');
-          console.log('teamName');
-          console.log(teamName);
-          console.log('visible');
-          console.log(visible);
-          console.log('route');
-          console.log(this.route);
-          console.log('route end');
-          if(visible && this.route.prefix == '/list'){
-            return teamName ? 'https://firebasestorage.googleapis.com/v0/b/note-app-firebase-5320d.appspot.com/o/teams%2F'+teamName+'.png?alt=media' : '';
-          }
         },
 
       _toArray: function(obj,visible) {

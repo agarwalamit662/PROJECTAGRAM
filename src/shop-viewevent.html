@@ -1,0 +1,275 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+<link rel="import" href="shop-button.html">
+<link rel="import" href="shop-image.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/scary-gallery/scary-gallery.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/effects/waterfall.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="shop-icons.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-document.html">
+<link rel="import" href="../bower_components/iron-demo-helpers/demo-pages-shared-styles.html">
+<link rel="import" href="../bower_components/iron-demo-helpers/demo-snippet.html">
+
+<dom-module id="shop-viewevent">
+
+  <template>
+
+    <style include="shop-button demo-pages-shared-styles">
+
+      .image-link {
+        outline: none;
+      }
+
+      paper-icon-button {
+        color: var(--app-primary-color);
+      }
+
+      .container{
+        margin-left: 5px;
+        margin-right: 5px;
+      }
+
+      .logo {
+        text-align: center;
+      }
+
+      .logo a {
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 0.3em;
+        color: var(--app-white-color);
+        text-decoration: none;
+        /* required for IE 11, so this <a> can receive pointer events */
+        display: inline-block;
+        pointer-events: auto;
+      }
+
+      .left-bar-item {
+        width: 40px;
+      }
+
+      app-header {
+        @apply(--layout-fixed-top);
+        z-index: 1;
+        background-color: #1976D2;
+        --app-header-shadow: {
+          box-shadow: inset 0px 5px 6px -3px rgba(0, 0, 0, 0.2);
+          height: 10px;
+          bottom: -10px;
+        };
+      }
+
+      .image-link > shop-image::after {
+        display: block;
+        content: '';
+        position: absolute;
+        transition-property: opacity;
+        transition-duration: 0s;
+        transition-delay: 90ms;
+        pointer-events: none;
+        opacity: 0;
+        top: 5px;
+        left: 5px;
+        right: 5px;
+        bottom: 5px;
+        outline: #2196F3 auto 5px;
+        outline: -moz-mac-focusring auto 5px;
+        outline: -webkit-focus-ring-color auto 5px;
+      }
+
+      .image-link:focus > shop-image::after {
+        opacity: 1;
+      }
+
+      h2 {
+        font-size: 1.3em;
+        font-weight: 500;
+        margin: 32px 0;
+      }
+
+      header h1{
+        text-align: center;
+      }
+
+
+      paper-fab {
+        position: fixed;
+        right: 25px;
+        bottom: 30px;
+      }
+
+      @media (max-width: 767px) {
+        .hero-image {
+          display: none;
+        }
+
+        .grid  li {
+          -webkit-flex-basis: 50%;
+          flex-basis: 50%;
+          max-width: 50%;
+        }
+
+        #mainContainer{
+          box-shadow:none;
+          -webkit-box-shadow:none;
+          -moz-box-shadow:none;
+          margin-left: 0%;
+          margin-right: 0%;
+          margin-top: 10px;
+          padding: 10px;
+        }
+
+      }
+
+    </style>
+    
+    <app-route
+        route="[[route]]"
+        pattern="/:eventid"
+        data="{{routeData}}"
+        ></app-route>
+
+    <firebase-document
+      path="/posts/[[routeData.eventid]]"
+      data="{{eventdata}}">
+    </firebase-document>
+
+    <app-header role="navigation" id="header" effects="waterfall" hidden="[[!signedin]]" condenses reveals>
+      <app-toolbar>
+        <div class="left-bar-item">
+          <paper-icon-button
+              class="menu-btn"
+              icon="menu"
+              on-click="_toggleDrawer"
+              aria-label="Categories">
+          </paper-icon-button>
+        </div>
+        <div class="logo" main-title><a href="#/" aria-label="SHOP Home">PROJECTAGRAM</a></div> 
+      </app-toolbar>
+    </app-header>
+
+    <div class="vertical-section-container container">
+      <demo-snippet>
+          
+        <h1>[[eventdata.title]]</h1>
+        <h4>[[eventdata.author]]</h4>
+        <hr>
+        <h3>[[eventdata.description]]</h3>
+        <div id="scarygallery">
+        </div>
+      </demo-snippet>
+    </div>
+
+    
+    
+  </template>
+
+  <script>
+
+    Polymer({
+
+      is: 'shop-viewevent',
+
+      properties: {
+
+        eventdata:{
+          type: Object,
+          notify : true
+        },
+
+        routeData: Object,
+
+        visible: {
+          type: Boolean,
+          observer: '_visibleChanged'
+        }
+
+      },
+
+      observers: [
+        '_eventdataChanged(eventdata)'
+      ],
+
+      _eventdataChanged : function(eventdata){
+        
+        var myNode = Polymer.dom(this.$.scarygallery);
+        while (myNode && myNode.firstChild) {
+            myNode.removeChild(myNode.firstChild);
+        }
+
+        if(eventdata && eventdata != null){
+
+          var images = eventdata.images;
+          if(images){
+
+          var sliderimages = this._toArray(images);
+          if(sliderimages){
+
+          var looper = '<scary-gallery>';  
+          for (var i = 0; i < sliderimages.length; i++) {
+
+            var val = sliderimages[i].value;
+            var imgpath = 'https://firebasestorage.googleapis.com/v0/b/note-app-firebase-5320d.appspot.com/o/posts%2F'+this.routeData.eventid+'%2F'+val+'?alt=media';
+            
+            var s = '<scary-image src="'+imgpath+'"></scary-image>';
+            looper = looper+s;
+            
+
+          }
+          looper = looper+'</scary-gallery>';
+          var temp = document.createElement('div');
+          temp.innerHTML = looper;
+          var htmlObject = temp.firstChild;
+          Polymer.dom(this.$.scarygallery).appendChild(htmlObject);
+
+          }
+          }
+        }
+
+      },
+
+      _toArray: function(obj) {
+
+        
+            return Object.keys(obj).map(function(key) {
+                return {
+                    name: key,
+                    value: obj[key]
+                };
+            });
+        
+        
+        },
+
+      _visibleChanged: function(visible) {
+        if (visible) {
+          
+          if(this.eventdata && this.eventdata.title){
+            this.fire('change-section', { title: this.eventdata.title });
+          }else{
+            this.fire('change-section', { title: 'View Event' });
+          }
+        }
+      },
+      
+      _toggleDrawer: function(){
+        this.fire('toggle-drawer', null);
+      }   
+
+    });
+
+  </script>
+
+</dom-module>
