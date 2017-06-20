@@ -61,6 +61,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           z-index: 1;
         }
 
+        shop-button[responsiveness] {
+          height: 64px;
+          z-index: 1;
+        }
+
         shop-button > * {
           padding: 4px 24px;
         }
@@ -76,6 +81,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
 
         shop-button[responsive] > *:focus {
+          background-color: var(--app-accent-color);
+        }
+
+        shop-button[responsiveness] > * {
+          background-color: var(--app-accent-color);
+          border: none;
+          color: white;
+          padding: 20px;
+          width: 100%;
+          height: 100%;
+          font-size: 15px;
+        }
+
+        shop-button[responsiveness] > *:focus {
           background-color: var(--app-accent-color);
         }
 

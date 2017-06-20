@@ -136,6 +136,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         margin: 30px 0;
       }
 
+      .fullwidth{
+        width: 100%;
+      }
+
       @media (max-width: 767px) {
 
         .grid {
@@ -435,14 +439,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   </shop-input>
                 </div>
 
-                <shop-button responsive id="submitBox">
+                <!-- <shop-button responsiveness id="submitBox">
                   <input type="button" on-click="_submit" value="Add User">
-                </shop-button>
+                </shop-button> -->
 
               </section>    
                 
                 
             </div>
+
+            <shop-button fullwidth responsiveness id="submitBox">
+                  <input class="fullwidth" type="button" on-click="_submit" value="ADD USER">
+            </shop-button>
+
           </form>
         </div>
 
