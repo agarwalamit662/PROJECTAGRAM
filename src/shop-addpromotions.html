@@ -30,7 +30,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="shop-select.html">
 <link rel="import" href="shop-checkbox.html">
 
-<dom-module id="shop-addrandr">
+<dom-module id="shop-addpromotions">
 
   <template>
     <style include="shop-common-styles shop-button shop-form-styles shop-input shop-select">
@@ -63,13 +63,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         pointer-events: auto;
       }
 
+      .left-bar-item {
+        width: 40px;
+      }
+
       header h1{
         color : darkgoldenrod;
         font-size: 1.8em;
-      }
-
-      .left-bar-item {
-        width: 40px;
       }
 
       app-header {
@@ -282,15 +282,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               on-iron-form-presubmit="_willSendRequest">
 
             <header class="subsection" visible$="{{hideFileListRe}}">
-              <h1>Add Rewards and Regonition</h1>
-              <span>Please fill all the details of the R & R properly...!!!!</span>
+              <h1>Add Promotions</h1>
+              <span>Please fill all the details of the Promotions properly...!!!!</span>
             </header>
 
             <div class="subsection grid" visible$="{{hideFileListRe}}">
               
               <section>
 
-                <h2 id="randrInfoHeading">R and R Details</h2>
+                <h2 id="randrInfoHeading">Promotion Details</h2>
                 <div class="row input-row">
                   <div class="column">
                     
@@ -393,13 +393,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               </section>
 
               <section>
-                <h2 id="usersInfoHeading">Users List</h2>
+                <h2 id="usersInfoHeading">Promoted Users List</h2>
                 <div class="row input-row">
 
                 <shop-input>  
                 <vaadin-combo-box id="elementsbox" items="[[_toArrayUsers(users)]]" item-value-path="name" item-label-path="fullname" on-selected-item-changed="_itemselectedchanged">
                   <template>
-                  <paper-icon-item style="padding: 0; display:inline;">
+                  <paper-icon-item style="padding: 0">
                   <paper-item-body two-line style="min-height: 0">
                   <div style="text-transform: capitalize">[[item.fullname]]</div>
                   <div secondary>[[item.email]]</div>
@@ -475,7 +475,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     Polymer({
 
-      is: 'shop-addrandr',
+      is: 'shop-addpromotions',
 
       properties: {
 
@@ -570,18 +570,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var _timestamp = -1*Date.now();
 
           var postData = {
-              title: this.$.month.value +' '+this.$.year.value,
+              title: this.$.year.value,
               date: this.$.date.value + ' '+this.$.month.value+' '+this.$.year.value,
               discussion: this.$.accountDescription.value,
               _timestamp: _timestamp
           };
 
   // Get a key for a new Post.
-          var newPostKey = app.database().ref().child('randr').push().key;
+          var newPostKey = app.database().ref().child('promotions').push().key;
 
   // Write the new post's data simultaneously in the posts list and the user's post list.
           var updates = {};
-          updates['/randr/' + newPostKey] = postData;
+          updates['/promotions/' + newPostKey] = postData;
           app.database().ref().update(updates);
 
           if(this.winners){
@@ -590,7 +590,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               
               for (var i = 0; i < arrayLength; i++) {
                     var winner = this.winners[i];
-                    app.database().ref().child('/randr/' + newPostKey+'/winners/'+winner.name).set(winner.name);
+                    app.database().ref().child('/promotions/' + newPostKey+'/winners/'+winner.name).set(winner.name);
               }
           }
 
@@ -598,7 +598,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                           this.$.checkoutForm.fire('iron-form-response', {
                             response: {
                                 success: 1,
-                                successMessage: 'R and R Added Successfully..!!'
+                                successMessage: 'Promotions Added Successfully..!!'
                             }
                           }, { bubbles: false });
                       }, 1000);
@@ -762,7 +762,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // Reset the UI states
         this._reset();
         // Notify the page's title
-        this.fire('change-section', { title: 'Add R&R' });
+        this.fire('change-section', { title: 'Add Promotions' });
       },
 
       _toArray: function(obj) {

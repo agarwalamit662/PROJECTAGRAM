@@ -20,7 +20,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
-<dom-module id="shop-rewards">
+<dom-module id="shop-promotions">
 
   <template>
 
@@ -166,7 +166,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
 
     <header>
-      <h1>Rewards and Recoginition</h1>
+      <h1>Promotions</h1>
     </header>
 
     <!-- <firebase-document
@@ -175,15 +175,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </firebase-document> -->    
 
     <firebase-query
-      id="randr"
-      path="/randr"
+      id="promotions"
+      path="/promotions"
       order-by-child="_timestamp"
       data="{{rewardsandrecog}}">
     </firebase-query>
 
     <app-indexeddb-mirror
         session="[[user.uid]]"
-        key="rewardsandrecog"
+        key="promotions"
         data="{{rewardsandrecog}}"
         persisted-data="{{categoryMembers}}">
     </app-indexeddb-mirror>
@@ -205,12 +205,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <ul class="grid">
       <template is="dom-repeat" items="[[categoryMembers]]" initial-count="4">
         <li>
-          <a href$="#/rewardslist/[[item.$key]]"><shop-rewardlist-item src="[[index]]" item="[[item]]"></shop-rewardlist-item></a>
+          <a href$="#/promotionslist/[[item.$key]]"><shop-rewardlist-item src="[[index]]" item="[[item]]"></shop-rewardlist-item></a>
         </li>
       </template>
     </ul>
 
-    <paper-fab title="Add R&R" elevation="5" on-tap="newRandR" icon="add"></paper-fab>
+    <paper-fab title="Add Promotions" elevation="5" on-tap="newRandR" icon="add"></paper-fab>
 
   </template>
 
@@ -218,7 +218,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     Polymer({
 
-      is: 'shop-rewards',
+      is: 'shop-promotions',
 
       properties: {
 
@@ -254,7 +254,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _visibleChanged: function(visible) {
         if (visible) {
-          this.fire('change-section', { title: 'Rewards and Recoginition' });
+          this.fire('change-section', { title: 'Promotions' });
         }
       },
       _toggleDrawer: function(){
@@ -262,7 +262,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       newRandR: function() {
-        this.set("route.path", "/addrandr");
+        this.set("route.path", "/addpromotions");
       }   
 
     });

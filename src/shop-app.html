@@ -261,8 +261,10 @@
             <a name="home" href="#/home">Home<hr/></a>
             <a name="teams" href="#/teams">Teams<hr/></a>
             <a name="rewards" href="#/rewards">R and R<hr/></a>
+            <a name="promotions" href="#/promotions">Promotions<hr/></a>
             <a name="adduser" href="#/adduser">Add User<hr/></a>
             <a name="addevent" href="#/addevent">Add Event<hr/></a>
+            <a name="addpromotions" href="#/addpromotions">Add Promotions<hr/></a>
 
         </iron-selector>
       </app-drawer>
@@ -277,6 +279,12 @@
 
       <shop-rewardslist name="rewardslist" route="[[subroute]]" user="[[user]]" offline="[[offline]]" signedin="[[signedIn]]"></shop-rewardslist>
 
+
+      <shop-promotions name="promotions" route="{{route}}" user="[[user]]" offline="[[offline]]" signedin="[[signedIn]]"></shop-promotions>
+
+      <shop-promotionslist name="promotionslist" route="[[subroute]]" user="[[user]]" offline="[[offline]]" signedin="[[signedIn]]"></shop-promotionslist>
+
+
       <shop-list name="list" page="[[page]]" route="[[subroute]]" user="[[user]]" offline="[[offline]]" signedin="[[signedIn]]"></shop-list>
 
       <!-- detail view of one item -->
@@ -289,6 +297,7 @@
       <shop-viewevent name="viewevent" route="{{subroute}}" signedin="[[signedIn]]"></shop-viewevent>
 
       <shop-addrandr name="addrandr" route="{{subroute}}" signedin="[[signedIn]]"></shop-addrandr>
+      <shop-addpromotions name="addpromotions" route="{{subroute}}" signedin="[[signedIn]]"></shop-addpromotions>
 
       
 

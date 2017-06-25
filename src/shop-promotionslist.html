@@ -13,7 +13,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="shop-common-styles.html">
 <link rel="import" href="shop-image.html">
-<link rel="import" href="shop-list-itemcongo.html">
+<link rel="import" href="shop-list-item.html">
+
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-scroll-effects/effects/waterfall.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
@@ -21,7 +22,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
-<dom-module id="shop-rewardslist">
+<dom-module id="shop-promotionslist">
 
   <template>
 
@@ -157,7 +158,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <!-- <template is="dom-if" if="[[_computeCall(route,visible)]]">     -->
 
     <firebase-document
-      path="/randr/[[routeData.category]]"
+      path="/promotions/[[routeData.category]]"
       data="{{categoryRewardsFirebase}}">
     </firebase-document>
 
@@ -198,7 +199,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </div>    
 
     <firebase-document
-      path="/randr/[[routeData.category]]/winners"
+      path="/promotions/[[routeData.category]]/winners"
       data="{{categoryWinnersFirebase}}">
     </firebase-document>    
 
@@ -210,7 +211,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </app-indexeddb-mirror>
 
     <header>
-      <h1>The Award Winners Are:</h1>
+      <h1>The Promoted Team Members Are:</h1>
     </header>
 
 
@@ -218,7 +219,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <ul class="grid" hidden$="[[failure]]">
       <template is="dom-repeat" items="[[_toArray(winnerMembers,visible)]]" initial-count="4">
         <li>
-          <a href$="[[_getItemHref(item)]]"><shop-list-itemcongo item="[[item]]"></shop-list-itemcongo></a>
+          <a href$="[[_getItemHref(item)]]"><shop-list-item item="[[item]]"></shop-list-item></a>
         </li>
       </template>
     </ul>
@@ -230,7 +231,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     Polymer({
 
-      is: 'shop-rewardslist',
+      is: 'shop-promotionslist',
 
       properties: {
 
@@ -316,7 +317,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 
 
-          if(visible && route && route.prefix == '/rewardslist'){
+          if(visible && route && route.prefix == '/promotionslist'){
             return true;
           }
           else return false;
@@ -324,7 +325,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _computePath: function(path,visible){
 
-            if(visible && this.route.prefix == '/rewardslist'){
+            if(visible && this.route.prefix == '/promotionslist'){
               return path ? path : '';              
 
             }
@@ -336,7 +337,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         _computePathMembers: function(path,visible){
 
-            if(visible && this.route.prefix == '/rewardslist'){
+            if(visible && this.route.prefix == '/promotionslist'){
               return path ? path+'winners' : '';              
 
             }
@@ -347,7 +348,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
       _computeImg: function(teamName,visible) {
-          if(visible && this.route.prefix == '/rewardslist'){
+          if(visible && this.route.prefix == '/promotionslist'){
             return teamName ? 'https://firebasestorage.googleapis.com/v0/b/note-app-firebase-5320d.appspot.com/o/teams%2F'+teamName+'.png?alt=media':'';
           }
         },

@@ -138,6 +138,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       }
 
+      vaadin-combo-box paper-icon-item{
+        display: inline;
+      } 
+
       h2 {
         font-size: 1.3em;
         font-weight: 500;
@@ -151,7 +155,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       .post {
         margin: 5px;
         padding: 5px;
-        width: 47.5%;
+        width: 48.3%;
         display: inline-block;
         box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
                     0 1px 5px 0 rgba(0, 0, 0, 0.12),
@@ -249,7 +253,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <!-- <div class="logo" main-title><a href="#/" aria-label="SHOP Home">PROJECTAGRAM</a></div>  -->
         <vaadin-combo-box id="elementsbox" items="[[_toArrayUsers(users)]]" item-value-path="name" item-label-path="fullname" on-selected-item-changed="_itemselectedchanged">
                   <template>
-                  <paper-icon-item style="padding: 0">
+                  <paper-icon-item style="padding: 0; display:inline;">
                   <paper-item-body two-line style="min-height: 0">
                   <div style="text-transform: capitalize">[[item.fullname]]</div>
                   <div secondary>[[item.email]]</div>
