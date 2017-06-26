@@ -12,11 +12,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="shop-button.html">
 <link rel="import" href="shop-common-styles.html">
 <link rel="import" href="shop-form-styles.html">
+<link rel="import" href="shop-icons.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/neon-animation/animations/scale-up-animation.html">
+<link rel="import" href="../bower_components/neon-animation/animations/fade-out-animation.html">
 
 <dom-module id="shop-list-itemcongo">
 
@@ -29,6 +35,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         @apply(--layout-center-justified);
         text-align: center;
         margin: 0 48px;
+      }
+
+      paper-dialog {
+        border-radius: 20px;
+      }
+
+      #checkoutFormWall{
+        margin-top: 20px;
+        margin-left: 10px;
+        margin-right: 10px;
+        margin-bottom: 5px;
+        display: flex;
       }
 
       shop-image {
@@ -69,22 +87,57 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <firebase-document
       path="/users/[[item.name]]"
-      data="{{userFirebase}}">
+      data="{{userData}}">
     </firebase-document>
 
-    <app-indexeddb-mirror
+    <firebase-auth
+        id="auth"
+        provider="email"
+        signed-in="{{signedIn}}"
+        user="{{user}}"
+        on-error="handleError">
+    </firebase-auth>
+
+    <firebase-document
+      path="/users/[[user.uid]]"
+      data="{{loguserFirebase}}">
+    </firebase-document>
+
+    <!-- <app-indexeddb-mirror
         session="[[user.uid]]"
         key="[[item.name]]"
         data="{{userFirebase}}"
         persisted-data="{{userData}}">
-    </app-indexeddb-mirror>
+    </app-indexeddb-mirror> -->
 
-    
-    <shop-image src="[[_computeImg(item.name)]]" alt="[[userData.name]]"></shop-image>
-    <div class="title">[[userData.name]]</div>
+    <a style="text-decoration:none;" href ="#/detail/[[item.name]]">
+      <shop-image src="[[_computeImg(item.name)]]" alt="[[userData.name]]"></shop-image>
+      <div class="title">[[userData.name]]</div>
+    </a>
     <shop-button id="submitBox">
-          <input type="button" on-click="_submit" value="CONGRATULATE">
-    </shop-button> 
+          <input type="button" on-click="_submitcong" value="CONGRATULATE">
+    </shop-button>
+
+
+    <paper-dialog id="actions" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop>
+      <!-- <h2 style=" margin-top:10px; margin-left:10px; margin-right:10px; text-align:center;">Are you sure you want to Log Out?</h2>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button on-click="dologout" dialog-confirm autofocus>Sign Out</paper-button>
+      </div> -->
+
+      <form id="checkoutFormWall"
+            is="iron-form"
+            method="post"
+            >
+            <paper-input flex="" label="Write Something on the wall" id="inputWall" name="inputWall"></paper-input>
+            <paper-fab icon="send" id="sendWallButton" on-tap="_submitWall" role="button" tabindex="0" aria-label="send"></paper-fab>
+      </form>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+      </div>
+
+    </paper-dialog> 
 
   </template>
 
@@ -106,7 +159,59 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _computeImg: function(teamName) {
             return teamName ? 'https://firebasestorage.googleapis.com/v0/b/note-app-firebase-5320d.appspot.com/o/users%2F'+teamName+'.jpg?alt=media' : '';
-      }
+      },
+
+      _submitcong: function(){
+        this.$.actions.open();
+      },
+
+      _submitWall: function(e) {
+        
+          if(this.$.inputWall.value == null || this.$.inputWall.value.length == 0){
+
+            var snackbar  = document.createElement('shop-snackbar');
+            Polymer.dom(this.root).appendChild(snackbar);
+          
+            Polymer.dom(snackbar).innerHTML = 'Message is Empty';
+            snackbar.open();
+          }else{
+            
+            var app = this.$.auth.app;
+            var _timestamp = -1*Date.now();
+            var postData = {
+              sendername: this.loguserFirebase.name,
+              senderid: this.user.uid,
+              message: this.$.inputWall.value,
+              _timestamp: _timestamp
+            };
+
+  // Get a key for a new Post.
+          var newPostKey = app.database().ref().child('profilewall').child(this.item.name).push().key;
+
+  // Write the new post's data simultaneously in the posts list and the user's post list.
+          var updates = {};
+          updates['/profilewall/' + this.item.name+'/'+newPostKey] = postData;
+          //updates['/chats/' + this.routeData.item+'/'+this.user.uid+'/'+newPostKey] = postData;
+          app.database().ref().update(updates);
+
+
+          this.$.inputWall.value = '';     
+
+          this.$.actions.close();
+
+              var snackbar  = document.createElement('shop-snackbar');
+              Polymer.dom(this.root).appendChild(snackbar);
+          
+              Polymer.dom(snackbar).innerHTML = 'Message Successfully Posted !';
+              snackbar.open();
+
+
+          }
+          
+        
+      },
+
+
 
 
     });

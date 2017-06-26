@@ -61,15 +61,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <firebase-document
       path="/users/[[item.name]]"
-      data="{{userFirebase}}">
+      data="{{userData}}">
     </firebase-document>
 
-    <app-indexeddb-mirror
+    <!-- <app-indexeddb-mirror
         session="[[user.uid]]"
         key="[[item.name]]"
         data="{{userFirebase}}"
         persisted-data="{{userData}}">
-    </app-indexeddb-mirror>
+    </app-indexeddb-mirror> -->
 
     
     <shop-image src="[[_computeImg(item.name)]]" alt="[[userData.name]]"></shop-image>

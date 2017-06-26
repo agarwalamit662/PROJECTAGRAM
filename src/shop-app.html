@@ -19,6 +19,9 @@
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="ss-fire.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/neon-animation/animations/scale-up-animation.html">
+<link rel="import" href="../bower_components/neon-animation/animations/fade-out-animation.html">
 <dom-module id="shop-app">
 
   <template>
@@ -61,6 +64,10 @@
 
       paper-icon-button {
         color: var(--app-primary-color);
+      }
+
+      #actions {
+        border-radius: 10px;
       }
 
       .logo {
@@ -238,8 +245,12 @@
       data="{{userprofile}}">
     </firebase-document>
 
+    <firebase-document
+      path="/admins/[[user.uid]]"
+      data="{{adminsdatadocument}}">
+    </firebase-document> 
 
-     <paper-dialog modal opened="[[opened]]" entry-animation="scale-up-animation" exit-animation="scale-down-animation"> 
+    <paper-dialog modal opened="[[opened]]" entry-animation="scale-up-animation" exit-animation="scale-down-animation"> 
           <sa-login
           on-sign-in="signIn"
           signed-in="[[signedIn]]"
@@ -262,10 +273,14 @@
             <a name="teams" href="#/teams">Teams<hr/></a>
             <a name="rewards" href="#/rewards">R and R<hr/></a>
             <a name="promotions" href="#/promotions">Promotions<hr/></a>
-            <a name="adduser" href="#/adduser">Add User<hr/></a>
-            <a name="addevent" href="#/addevent">Add Event<hr/></a>
-            <a name="addpromotions" href="#/addpromotions">Add Promotions<hr/></a>
+            
+            <template is="dom-if" if="[[isLoggedInSender(adminsdatadocument)]]">
 
+              <a name="adduser" href="#/adduser">Add User<hr/></a>
+              <!-- <a name="addevent" href="#/addevent">Add Event<hr/></a> -->
+              <!-- <a name="addpromotions" href="#/addpromotions">Add Promotions<hr/></a> -->
+
+            </template>
         </iron-selector>
       </app-drawer>
 
@@ -275,12 +290,12 @@
 
       <shop-teams name="teams" user="[[user]]" signedin="[[signedIn]]"></shop-teams>
       <!-- list view of items in a category -->
-      <shop-rewards name="rewards" route="{{route}}" user="[[user]]" offline="[[offline]]" signedin="[[signedIn]]"></shop-rewards>
+      <shop-rewards name="rewards" route="{{route}}" user="[[user]]" offline="[[offline]]" signedin="[[signedIn]]" canadd="[[isLoggedInSender(adminsdatadocument)]]"></shop-rewards>
 
       <shop-rewardslist name="rewardslist" route="[[subroute]]" user="[[user]]" offline="[[offline]]" signedin="[[signedIn]]"></shop-rewardslist>
 
 
-      <shop-promotions name="promotions" route="{{route}}" user="[[user]]" offline="[[offline]]" signedin="[[signedIn]]"></shop-promotions>
+      <shop-promotions name="promotions" route="{{route}}" user="[[user]]" offline="[[offline]]" signedin="[[signedIn]]" canadd="[[isLoggedInSender(adminsdatadocument)]]"></shop-promotions>
 
       <shop-promotionslist name="promotionslist" route="[[subroute]]" user="[[user]]" offline="[[offline]]" signedin="[[signedIn]]"></shop-promotionslist>
 
@@ -288,10 +303,13 @@
       <shop-list name="list" page="[[page]]" route="[[subroute]]" user="[[user]]" offline="[[offline]]" signedin="[[signedIn]]"></shop-list>
 
       <!-- detail view of one item -->
-      <shop-detail name="detail" route="[[subroute]]" user="[[user]]"  offline="[[offline]]" signedin="[[signedIn]]"></shop-detail>
+      <shop-detail name="detail" route="[[subroute]]" user="[[user]]" loggedin="[[user]]" offline="[[offline]]" signedin="[[signedIn]]"></shop-detail>
       <!-- cart view -->
       
       <shop-adduser name="adduser"  route="{{subroute}}" signedin="[[signedIn]]"></shop-adduser>
+
+      <shop-edituser name="edituser"  route="{{subroute}}" signedin="[[signedIn]]"></shop-edituser>
+      
       <shop-addevent name="addevent" route="{{subroute}}" signedin="[[signedIn]]"></shop-addevent>
 
       <shop-viewevent name="viewevent" route="{{subroute}}" signedin="[[signedIn]]"></shop-viewevent>
@@ -305,6 +323,14 @@
     </iron-pages>
 
     <div class="announcer" aria-live="assertive">[[_a11yLabel]]</div>
+
+    <paper-dialog id="actions" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop>
+      <h2 style=" margin-top:10px; margin-left:10px; margin-right:10px; text-align:center;">Are you sure you want to Log Out?</h2>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button on-click="dologout" dialog-confirm autofocus>Sign Out</paper-button>
+      </div>
+    </paper-dialog>
 
   </template>
 
@@ -355,6 +381,7 @@
 
       listeners: {
         'change-section': '_onChangeSection',
+        'log-out':'openlogout',
         'announce': '_onAnnounce',
         'dom-change': '_domChange',
         'toggle-drawer': '_toggleDrawer',
@@ -365,6 +392,11 @@
         window.performance && performance.mark && performance.mark('shop-app.created');
         // Custom elements polyfill safe way to indicate an element has been upgraded.
         this.removeAttribute('unresolved');
+      },
+
+      openlogout: function(){
+        this.$.actions.open();
+        //this.fire('log-out', null);
       },
 
       ready: function() {
@@ -391,6 +423,7 @@
 
         } else {
           this.set('opened', true);
+          this.page = 'home';
         }
       },
 
@@ -484,9 +517,9 @@
         // Scroll to the top of the page when navigating to a non-list page. For list view,
         // scroll to the last saved position only if the category has not changed.
         var scrollTop = 0;
-        if (this.page === 'list' && this.categoryName === detail.category) {
+        /*if (this.page === 'list' && this.categoryName === detail.category) {
           scrollTop = this._listScrollTop;
-        }
+        }*/
         // Use `Polymer.AppLayout.scroll` with `behavior: 'silent'` to disable header scroll
         // effects during the scroll.
         Polymer.AppLayout.scroll({ top: scrollTop, behavior: 'silent' });
@@ -530,6 +563,27 @@
       
       _computeImages: function(teamName) {
             return teamName ? "https://firebasestorage.googleapis.com/v0/b/note-app-firebase-5320d.appspot.com/o/users%2F"+teamName+".jpg?alt=media" : '';
+      },
+
+      isLoggedInSender: function(adminsdatadocument){
+        
+        if(adminsdatadocument && null != adminsdatadocument && adminsdatadocument.admin && adminsdatadocument.admin == '1'){
+            return true;
+        }
+        else{
+            return false;
+        }
+
+      },
+
+      dologout: function(){
+          var current = this;
+          this.$.auth.signOut().then(function() {
+              console.log('Signed Out');
+              current.set('opened', true);
+          }, function(error) {
+              console.error('Sign Out Error', error);
+          });        
       }
 
     });

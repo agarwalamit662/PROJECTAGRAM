@@ -11,6 +11,7 @@
     "src/shop-promotionslist.html",
     "src/shop-detail.html",
     "src/shop-adduser.html",
+    "src/shop-edituser.html",
     "src/shop-addevent.html",
     "src/shop-addrandr.html",
     "src/shop-addpromotions.html",

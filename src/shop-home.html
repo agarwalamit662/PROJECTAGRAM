@@ -20,6 +20,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../bower_components/vaadin-combo-box/vaadin-combo-box.html">
+
+
 <dom-module id="shop-home">
 
   <template>
@@ -65,18 +67,32 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         };
       }
 
+      button {
+        position: absolute;
+        top: 0;
+        right: 0px;
+        text-transform: uppercase;
+        border: none;
+        cursor: pointer;
+        background: #e0e0e0;
+      }
+
       app-header app-toolbar{
         height: 80px; 
       }
 
       app-header app-toolbar vaadin-combo-box {
-        width: 30%;
+        width: 40%;
         padding: 10px;
         --vaadin-combo-box-paper-input-container:{
           background: white;
           border-radius: 10px;
           padding-left: 10px;
         }
+      }
+
+      .logoutclass{
+        width: 55%;
       }
 
       .image-link > shop-image::after {
@@ -207,6 +223,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         .post {
           width: 93%;
         }
+
+        .logoutclass{
+          width: 30%;
+        }
         
 
       }
@@ -225,7 +245,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       id="posts"
       path="/posts"
       order-by-child="_timestamp"
-      data="{{eventsdata}}">
+      data="{{data}}">
     </firebase-query>
 
     <firebase-document
@@ -233,12 +253,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       data="{{users}}">
     </firebase-document>
 
-    <app-indexeddb-mirror
+    <!-- <app-indexeddb-mirror
         session="[[user.uid]]"
         key="posts"
         data="{{eventsdata}}"
         persisted-data="{{data}}">
-    </app-indexeddb-mirror>
+    </app-indexeddb-mirror> -->
 
     <app-header role="navigation" id="header" effects="waterfall" hidden="[[!signedin]]" condenses reveals>
       <app-toolbar>
@@ -261,7 +281,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   </paper-icon-item>
                   </template>
                 </vaadin-combo-box>
+      
+        <div class="left-bar-item logoutclass">
+          <paper-icon-button
+              class="menu-btn"
+              icon="account-circle"
+              on-click="openlogout"
+              aria-label="Sign Out"
+              style="float: right; color: white; height: 50px; width: 50px;">
+          </paper-icon-button>
+        </div>        
+                
       </app-toolbar>
+
+
     </app-header>
 
     <!-- <template is="dom-repeat" items="[[_toArray(data)]]" as="post"> -->
@@ -283,6 +316,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </div>
     <paper-fab title="Add Event" elevation="5" on-tap="newEvent" icon="add"></paper-fab>
     
+    <!-- <paper-dialog id="actions" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop>
+      <h2 style="text-align:center;">Want to Log Out?</h2>
+      <div class="button">
+        <paper-button dialog-dismiss>Decline</paper-button>
+        <paper-button dialog-confirm autofocus>Accept</paper-button>
+      </div>
+    </paper-dialog> -->    
 
   </template>
 
@@ -352,6 +392,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var winner = e.detail.value;
           this.set("route.path", winner.routepath);
         }
+      },
+
+      openlogout: function(){
+        //this.$.actions.open();
+        this.fire('log-out', null);
       }
 
     });

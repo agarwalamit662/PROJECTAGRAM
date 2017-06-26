@@ -157,7 +157,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               aria-label="Categories">
           </paper-icon-button>
         </div>
-        <div class="logo" main-title><a href="#/" aria-label="SHOP Home">PROJECTAGRAM</a></div> 
+        <div class="logo" main-title><a href="#/" aria-label="SHOP Home">PROJECTAGRAM</a></div>
+        <div class="left-bar-item" style="margin-right:20px;">
+          <paper-icon-button
+              class="menu-btn"
+              icon="account-circle"
+              on-click="openlogout"
+              aria-label="Sign Out"
+              style="color: white; height: 50px; width: 50px;">
+          </paper-icon-button>
+        </div>
       </app-toolbar>
     </app-header>
 
@@ -267,6 +276,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       
       _toggleDrawer: function(){
         this.fire('toggle-drawer', null);
+      },
+
+      openlogout: function(){
+        //this.$.actions.open();
+        this.fire('log-out', null);
       }   
 
     });

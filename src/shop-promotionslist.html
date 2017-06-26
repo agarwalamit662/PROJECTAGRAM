@@ -13,7 +13,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="shop-common-styles.html">
 <link rel="import" href="shop-image.html">
-<link rel="import" href="shop-list-item.html">
+<link rel="import" href="shop-list-itemcongo.html">
 
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-scroll-effects/effects/waterfall.html">
@@ -159,15 +159,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <firebase-document
       path="/promotions/[[routeData.category]]"
-      data="{{categoryRewardsFirebase}}">
+      data="{{category}}">
     </firebase-document>
 
-    <app-indexeddb-mirror
+    <!-- <app-indexeddb-mirror
         session="[[user.uid]]"
         key="[[_computePath(routeData.category,visible)]]"
         data="{{categoryRewardsFirebase}}"
         persisted-data="{{category}}">
-    </app-indexeddb-mirror>    
+    </app-indexeddb-mirror>  -->   
 
 
     <!-- <shop-image
@@ -187,7 +187,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               aria-label="Categories">
           </paper-icon-button>
         </div>
-        <div class="logo" main-title><a href="#/" aria-label="SHOP Home">PROJECTAGRAM</a></div> 
+        <div class="logo" main-title><a href="#/" aria-label="SHOP Home">PROJECTAGRAM</a></div>
+        <div class="left-bar-item" style="margin-right:20px;">
+          <paper-icon-button
+              class="menu-btn"
+              icon="account-circle"
+              on-click="openlogout"
+              aria-label="Sign Out"
+              style="color: white; height: 50px; width: 50px;">
+          </paper-icon-button>
+        </div> 
       </app-toolbar>
     </app-header>    
 
@@ -219,7 +228,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <ul class="grid" hidden$="[[failure]]">
       <template is="dom-repeat" items="[[_toArray(winnerMembers,visible)]]" initial-count="4">
         <li>
-          <a href$="[[_getItemHref(item)]]"><shop-list-item item="[[item]]"></shop-list-item></a>
+          <shop-list-itemcongo item="[[item]]"></shop-list-itemcongo>
         </li>
       </template>
     </ul>
@@ -376,7 +385,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             return  '(' + count + ' ' + pluralizedQ + ')';
           }
 
-        }, 
+        },
+
+        openlogout: function(){
+        //this.$.actions.open();
+        this.fire('log-out', null);
+      } 
 
     });
 

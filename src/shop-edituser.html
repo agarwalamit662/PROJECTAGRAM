@@ -24,7 +24,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="shop-select.html">
 <link rel="import" href="shop-checkbox.html">
 
-<dom-module id="shop-adduser">
+<dom-module id="shop-edituser">
 
   <template>
     <style include="shop-common-styles shop-button shop-form-styles shop-input shop-select shop-checkbox">
@@ -161,6 +161,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     </style>
 
+    
+
+    <!-- <template is="dom-if" if="[[_computeCall(route,visible)]]"> -->
+              
     <firebase-auth
         id="auth"
         provider="email"
@@ -170,18 +174,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </firebase-auth>
 
     <firebase-document
-      path="/teams"
-      data="{{persistedData}}">
+      path="/users/[[user.uid]]"
+      data="{{loguserFirebase}}">
     </firebase-document>
 
-
-    <!-- <app-indexeddb-mirror
-        session="[[user.uid]]"
-        key="teams"
-        data="{{teamdata}}"
-        persisted-data="{{persistedData}}">
-    </app-indexeddb-mirror>
- -->
     <app-header role="navigation" id="header" effects="waterfall" hidden="[[!signedin]]" condenses reveals>
       <app-toolbar>
         <div class="left-bar-item">
@@ -217,7 +213,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               on-iron-form-presubmit="_willSendRequest">
 
             <header class="subsection" visible$="{{hideFileListRe}}">
-              <h1>Add User</h1>
+              <h1>Edit User</h1>
               <span>Please fill all the details of the user properly...!!!!</span>
             </header>
 
@@ -230,7 +226,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   <shop-input>
                     
                     <!-- <progress id="upProg" value="0" max="100">0%</progress> -->
-                    <input id="fileButt" name="fileButt" type="file" value="upload" accept="[[fileType]]" required  aria-labelledby="profilepicLabel accountInfoHeading" placeholder="Email"/>
+                    <input id="fileButt" name="fileButt" type="file" value="upload" accept="[[fileType]]" aria-labelledby="profilepicLabel accountInfoHeading" placeholder="Email"/>
                     
                     <shop-md-decorator error-message="Invalid File" aria-hidden="true">
                       <label id="profilepicLabel">Profile Pic</label>
@@ -243,36 +239,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
               <section>
                 <h2 id="accountInfoHeading">Account Information</h2>
+                
                 <div class="row input-row">
                   <shop-input>
-                    <input type="email" id="accountEmail" name="accountEmail"
-                        placeholder="Email" required
-                        aria-labelledby="accountEmailLabel accountInfoHeading">
-                    <shop-md-decorator error-message="Invalid Email" aria-hidden="true">
-                      <label id="accountEmailLabel">Email</label>
-                      <shop-underline></shop-underline>
-                    </shop-md-decorator>
-                  </shop-input>
-
-                  
-                </div>
-                <div class="row input-row">
-                  
-                  <shop-input>
-                  <input type="text" id="accountPassword" name="accountPassword" placeholder="Password" pattern="(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).[0-9A-Za-z]{7,}"  required
-                        aria-labelledby="accountPasswordLabel accountInfoHeading">
- 
-                  </paper-password-input>
-                  <shop-md-decorator error-message="At least one number and one uppercase,one lowercase letter,8 or more characters" aria-hidden="true">
-                      <label id="accountPasswordLabel">Password</label>
-                      <shop-underline></shop-underline>
-                    </shop-md-decorator>
-                  </shop-input>
-                </div>
-
-                <div class="row input-row">
-                  <shop-input>
-                    <input type="tel" id="accountPhone" name="accountPhone" pattern="\d{10,}"
+                    <input type="tel" id="accountPhone" name="accountPhone" pattern="\d{10,}" value="[[loguserFirebase.mobileNum]]"
                         placeholder="Phone Number" required
                         aria-labelledby="accountPhoneLabel accountInfoHeading">
                     <shop-md-decorator error-message="Invalid Phone Number" aria-hidden="true">
@@ -282,39 +252,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   </shop-input>
                 </div>
                 <h2 id="shipAddressHeading">Personal Details</h2>
-                <div class="row input-row">
-                  <shop-input>
-                    <input type="text" id="fullName" name="fullName" pattern=".{4,}"
-                        placeholder="Full Name" required
-                        aria-labelledby="fullNameLabel shipAddressHeading">
-                    <shop-md-decorator error-message="Invalid Name.. Minimum 4 letters..!!" aria-hidden="true">
-                      <label id="fullNameLabel">Full Name</label>
-                      <shop-underline></shop-underline>
-                    </shop-md-decorator>
-                  </shop-input>
-                </div>
-
-                <div class="row input-row">
-                  <div class="column">
-                    <label for="team">Team</label>
-                    <shop-select>
-                      <select id="team" name="team" required
-                           autocomplete="team" aria-label="Team">
-                        <template is="dom-repeat" items="[[_toArray(persistedData)]]" strip-whitespace>
-                              <option value="[[item.name]]" selected>[[item.value.title]]</option>
-                        </template>
-                      </select>
-                      <shop-md-decorator aria-hidden="true">
-                        <shop-underline></shop-underline>
-                      </shop-md-decorator>
-                    </shop-select>
-                  </div>
-                </div>
-
+                
                 <div class="row input-row">
                   <shop-input>
                     <input type="text" id="designation" name="designation" pattern=".{4,}"
-                        placeholder="Designation" required
+                        placeholder="Designation" required value="[[loguserFirebase.designation]]"
                         aria-labelledby="designationLabel shipAddressHeading">
                     <shop-md-decorator error-message="Invalid Designation.. Minimum 4 letters..!!" aria-hidden="true">
                       <label id="designationLabel">Designation</label>
@@ -322,73 +264,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     </shop-md-decorator>
                   </shop-input>
                 </div>
-
-                <div class="row input-row">
-                  <div class="column">
-                    <label for="dateOfBirth">Date Of Birth</label>
-                    <shop-select>
-                      <select id="month" name="month" required
-                           autocomplete="month" aria-label="Month">
-                        <option value="January" selected>January</option>
-                        <option value="February">February</option>
-                        <option value="March">March</option>
-                        <option value="April">April</option>
-                        <option value="May">May</option>
-                        <option value="June">June</option>
-                        <option value="July">July</option>
-                        <option value="August">August</option>
-                        <option value="September">September</option>
-                        <option value="October">October</option>
-                        <option value="November">November</option>
-                        <option value="December">December</option>
-                      </select>
-                      <shop-md-decorator aria-hidden="true">
-                        <shop-underline></shop-underline>
-                      </shop-md-decorator>
-                    </shop-select>
-                  </div>
-                  <div class="column">
-                  <shop-select>
-                    <select id="date" name="date" required
-                        autocomplete="date" aria-label="Date">
-                      <option value="1st" selected>01</option>
-                      <option value="2nd">02</option>
-                      <option value="3rd">03</option>
-                      <option value="4th">04</option>
-                      <option value="5th">05</option>
-                      <option value="6th">06</option>
-                      <option value="7th">07</option>
-                      <option value="8th">08</option>
-                      <option value="9th">09</option>
-                      <option value="10th">10</option>
-                      <option value="11th">11</option>
-                      <option value="12th">12</option>
-                      <option value="13th">13</option>
-                      <option value="14th">14</option>
-                      <option value="15th">15</option>
-                      <option value="16th">16</option>
-                      <option value="17th">17</option>
-                      <option value="18th">18</option>
-                      <option value="19th">19</option>
-                      <option value="20th">20</option>
-                      <option value="21st">21</option>
-                      <option value="22nd">22</option>
-                      <option value="23rd">23</option>
-                      <option value="24th">24</option>
-                      <option value="25th">25</option>
-                      <option value="26th">26</option>
-                      <option value="27th">27</option>
-                      <option value="28th">28</option>
-                      <option value="29th">29</option>
-                      <option value="30th">30</option>
-                      <option value="31st">31</option>
-                    </select>
-                    <shop-md-decorator aria-hidden="true">
-                      <shop-underline></shop-underline>
-                    </shop-md-decorator>
-                  </shop-select>
-                  </div>
-                </div>
+                
               </section>    
               
               <section>
@@ -396,7 +272,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <div class="row input-row">
                   <shop-input>
                     <input type="text" id="education" name="education" pattern=".{4,}"
-                        placeholder="Education" required
+                        placeholder="Education" required value="[[loguserFirebase.education]]"
                         aria-labelledby="educationLabel otherInfoHeading">
                     <shop-md-decorator error-message="Invalid Education.. Minimum 4 letters..!!" aria-hidden="true">
                       <label id="educationLabel">Education</label>
@@ -408,7 +284,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <div class="row input-row">
                   <shop-input>
                     <input type="text" id="passion" name="passion" pattern=".{4,}"
-                        placeholder="Passion" required
+                        placeholder="Passion" required value="[[loguserFirebase.passion]]"
                         aria-labelledby="passionLabel otherInfoHeading">
                     <shop-md-decorator error-message="Invalid Passion.. Minimum 4 letters..!!" aria-hidden="true">
                       <label id="passionLabel">Passion</label>
@@ -420,7 +296,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <div class="row input-row">
                   <shop-input>
                     <input type="text" id="shortBio" name="shortBio" pattern=".{4,}"
-                        placeholder="Short Bio" required
+                        placeholder="Short Bio" required value="[[loguserFirebase.shortBio]]"
                         aria-labelledby="shortBioLabel otherInfoHeading">
                     <shop-md-decorator error-message="Invalid Bio.. Minimum 4 letters..!!" aria-hidden="true">
                       <label id="shortBioLabel">Short Bio</label>
@@ -434,7 +310,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <div class="row input-row">
                   <shop-input>
                     <input type="text" id="fblink" name="fblink" pattern=".{2,}"
-                        placeholder="Facebook Link" required
+                        placeholder="Facebook Link" required value="[[loguserFirebase.fblink]]"
                         aria-labelledby="fblinkLabel otherInfoHeading">
                     <shop-md-decorator error-message="Invalid Facebook Link" aria-hidden="true">
                       <label id="fblinkLabel">Facebook Link</label>
@@ -445,7 +321,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <div class="row input-row">
                   <shop-input>
                     <input type="text" id="linkedin" name="linkedin" pattern=".{2,}"
-                        placeholder="LinkedIn" required
+                        placeholder="LinkedIn" required value="[[loguserFirebase.linkedin]]"
                         aria-labelledby="linkedinLabel otherInfoHeading">
                     <shop-md-decorator error-message="Invalid LinkedIn" aria-hidden="true">
                       <label id="linkedinLabel">LinkedIn</label>
@@ -464,7 +340,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </div>
 
             <shop-button fullwidth responsiveness id="submitBox">
-                  <input class="fullwidth" type="button" on-click="_submit" value="ADD USER">
+                  <input class="fullwidth" type="button" on-click="_submit" value="EDIT USER">
             </shop-button>
 
           </form>
@@ -481,10 +357,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <!-- Error message UI -->
         <header state="error">
-          <h1>We couldn&acute;t add the user at this moment.</h1>
+          <h1>We couldn&acute;t edit the user at this moment.</h1>
           <p id="errorMessage">[[response.errorMessage]]</p>
           <shop-button responsive>
-            <a href="#/adduser">Try again</a>
+            <a href="#/edituser">Try again</a>
           </shop-button>
         </header>
 
@@ -492,12 +368,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     </div>
 
-    <!-- Handles the routing for the success and error subroutes -->
     <app-route
         route="[[route]]"
         pattern="/:state"
         on-active-changed="_activeRouteHandler">
-     </app-route>
+    </app-route>
 
     <!-- Show spinner when waiting for the server to repond -->
     <paper-spinner-lite active="[[waiting]]"></paper-spinner-lite>
@@ -508,7 +383,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     Polymer({
 
-      is: 'shop-adduser',
+      is: 'shop-edituser',
 
       properties: {
 
@@ -569,43 +444,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           this.$.checkoutForm.fire('iron-form-presubmit', null, { bubbles: false });
 
-          var current = this;
-          this.$.auth.createUserWithEmailAndPassword(this.$.accountEmail.value, this.$.accountPassword.value)
-          .then(function(firebaseUser) {
+          this.$.auth.app.database().ref('users/' + this.user.uid).child('designation').set(this.$.designation.value);
+          
+          this.$.auth.app.database().ref('users/' + this.user.uid).child('education').set(this.$.education.value);
+          
+          this.$.auth.app.database().ref('users/' + this.user.uid).child('fblink').set(this.$.fblink.value);
 
+          this.$.auth.app.database().ref('users/' + this.user.uid).child('linkedin').set(this.$.linkedin.value);
+
+          this.$.auth.app.database().ref('users/' + this.user.uid).child('mobileNum').set(this.$.accountPhone.value);
+
+          this.$.auth.app.database().ref('users/' + this.user.uid).child('passion').set(this.$.passion.value);
+
+          this.$.auth.app.database().ref('users/' + this.user.uid).child('shortBio').set(this.$.shortBio.value);
+
+
+          if(this.$.fileButt && this.$.fileButt != null && this.$.fileButt.files[0] && this.$.fileButt.files[0] != null ){
               
-
-              var app = current.$.auth.app;
-              var uidnew = firebaseUser.uid;
-              app.database().ref('users/' + firebaseUser.uid).set({
-                designation: current.$.designation.value,
-                dob: current.$.date.value + current.$.month.value,
-                education : current.$.education.value,
-                emailId : current.$.accountEmail.value,
-                fblink :current.$.fblink.value,
-                linkedin :current.$.linkedin.value,
-                mobileNum : current.$.accountPhone.value,
-                name : current.$.fullName.value,
-                passion :current.$.passion.value,
-                shortBio : current.$.shortBio.value,
-                team : current.$.team.value
-              });
-
-              var yourObject = {};
-
-              yourObject[firebaseUser.uid] = "0";
-
-              //ref.child("Victor").setValue("setting custom key when pushing new data to firebase database");
-
-              app.database().ref('teams/' + current.$.team.value+'/members').child(uidnew).set('0');
-
-              var file = current.$.fileButt.files[0];
+              var file = this.$.fileButt.files[0];
 
               var dest = '';
               //dest = 'users/'+file.name;
-              dest = 'users/'+firebaseUser.uid+'.jpg';
-              var fbsImageRef = app.storage().ref(dest);
+              dest = 'users/'+this.user.uid+'.jpg';
+              var fbsImageRef = this.$.auth.app.storage().ref(dest);
               var monitor = fbsImageRef.put(file);
+              var current = this;
         //update progress
               monitor.on('state_changed',
                 function progress(snapshot){
@@ -622,7 +485,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                       current.$.checkoutForm.fire('iron-form-response', {
                         response: {
                             success: 1,
-                            successMessage: 'Person Added Successfully..!!'
+                            successMessage: 'Person Edited Successfully..!!'
                         }
                       }, { bubbles: false });
                   }, 1000);
@@ -630,23 +493,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 }
               );
 
-
-              
-
-            }).catch(function(error) {
-              var errorCode = error.code;
-              var errMessage = error.message;
-
-              current.debounce('_submitForm', function() {
-              current.$.checkoutForm.fire('iron-form-response', {
-                response: {
-                  error: 1,
-                  errorMessage: errMessage
-                }
-              }, { bubbles: false });
-            }, 1000);  
-  // ...
-          });
+             }else{
+              this.debounce('_submitForm', function() {
+                      this.$.checkoutForm.fire('iron-form-response', {
+                        response: {
+                            success: 1,
+                            successMessage: 'Person Edited Successfully..!!'
+                        }
+                      }, { bubbles: false });
+                  }, 1000);
+             } 
+          
         }
       },
 

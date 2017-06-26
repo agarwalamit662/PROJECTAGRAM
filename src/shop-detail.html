@@ -21,6 +21,11 @@
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
 <link rel="import" href="shop-form-styles.html">
 <link rel="import" href="shop-input.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/neon-animation/animations/scale-up-animation.html">
+<link rel="import" href="../bower_components/neon-animation/animations/scale-down-animation.html">
+<link rel="import" href="../bower_components/neon-animation/animations/fade-out-animation.html">
+
 
 <dom-module id="shop-detail">
 
@@ -478,28 +483,33 @@
 
     <firebase-document
       path="/users/[[routeData.item]]"
-      data="{{userFirebase}}">
+      data="{{item}}">
     </firebase-document>
 
-    <app-indexeddb-mirror
+    <!-- <firebase-document
+      path="/users/[[routeData.item]]"
+      data="{{item}}">
+    </firebase-document> -->
+
+    <!-- <app-indexeddb-mirror
         session="[[user.uid]]"
         key="[[_computePath(routeData.item,visible)]]"
         data="{{userFirebase}}"
         persisted-data="{{item}}">
     </app-indexeddb-mirror>
-
+ -->
     <firebase-document
       path="/teams/[[item.team]]"
-      data="{{categoryFirebase}}">
+      data="{{category}}">
     </firebase-document>
     
 
-    <app-indexeddb-mirror
+    <!-- <app-indexeddb-mirror
         session="[[user.uid]]"
         key="[[_computePath(item.team,visible)]]"
         data="{{categoryFirebase}}"
         persisted-data="{{category}}">
-    </app-indexeddb-mirror>
+    </app-indexeddb-mirror> -->
 
     
     <!-- </template> -->
@@ -513,7 +523,16 @@
             <paper-icon-button icon="arrow-back" aria-label="Go back"></paper-icon-button>
           </a>
         </div>
-        <div class="logo" main-title><a href="#/" aria-label="SHOP Home">PROJECTAGRAM</a></div> 
+        <div class="logo" main-title><a href="#/" aria-label="SHOP Home">PROJECTAGRAM</a></div>
+        <div class="left-bar-item" style="margin-right:20px;">
+          <paper-icon-button
+              class="menu-btn"
+              icon="account-circle"
+              on-click="openlogout"
+              aria-label="Sign Out"
+              style="color: white; height: 50px; width: 50px;">
+          </paper-icon-button>
+        </div>
       </app-toolbar>
     
 
@@ -528,10 +547,9 @@
                   <a on-click = "changeState" data-args="profile">Profile</a>
                 </shop-tab>
 
-                <shop-tab name="chat">
+                <!-- <shop-tab name="chat">
                   <a on-click = "changeState" data-args="chat">Chat</a>
-                  <!-- <a href='javascript:;' onclick="changeState(announcements);">Announcements</a> -->
-                </shop-tab>
+                </shop-tab> -->
 
                 <shop-tab name="events">
                   <a on-click = "changeState" data-args="events">Events</a>
@@ -552,9 +570,17 @@
 
       <div id="contentinner" hidden$="[[failure]]">
       <shop-image alt="[[item.name]]" src="[[_computeImg(routeData.item,visible)]]"></shop-image>
-      <shop-button style="text-align:center;">
-              <a href = "[[item.fblink]]" target="_blank" style="border-radius:20px;">Edit Profile</a>
-      </shop-button>
+      
+      <!-- <template is="dom-if" if="[[isLoggedInSenderNew(routeData.item)]]"> -->
+        <template is="dom-if" if="[[_shouldeditprofile]]">
+
+
+        <shop-button style="text-align:center;">
+                <a href = "#/edituser" style="border-radius:20px;">Edit Profile</a>
+        </shop-button>
+
+      </template>
+      
       </div>
 
       <div class="detail" has-content$="[[_isDefined(item)]]">
@@ -563,23 +589,37 @@
         <div class="price">[[item.designation]]</div>
         <div class="description">
           <h2>E-Mail: </h2>
-          <p id="emailId"></p>
+          <!-- <p id="emailId"></p> -->
+          <p>[[item.emailId]]</p>
           <hr>
 
-          <h2>Date Of Birth: </h2>
-          <p id="dob"></p>
+          <h2>Date Of Birth:</h2>
+          <!-- <p id="dob"></p> -->
+          <p>[[item.dob]]</p>
           <hr>
 
           <h2>Mobile Number: </h2>
-          <p id="mobileNum"></p>
+          <!-- <p id="mobileNum"></p> -->
+          <p>[[item.mobileNum]]</p>
           <hr>
 
           <h2>Team: </h2>
           <p id="team">[[category.title]]</p>
           <hr>
 
-          <h2>Description</h2>
-          <p id="desc"></p>
+          <h2>Short Bio</h2>
+          <!-- <p id="desc"></p> -->
+          <p>[[item.shortBio]]</p>
+          <hr>
+
+          <h2>Passion</h2>
+          <!-- <p id="desc"></p> -->
+          <p>[[item.passion]]</p>
+          <hr>
+
+          <h2>Education</h2>
+          <!-- <p id="desc"></p> -->
+          <p>[[item.education]]</p>
           <hr>
 
           <shop-button>
@@ -601,7 +641,7 @@
               </form>
           </div>
 
-          <div id = "wallmessages" class = "postouterwall" has-content$="[[_isDefined(profilewalldata)]]">
+          <div id = "wallmessages" class = "postouterwall">
 
             
 
@@ -609,7 +649,22 @@
       
               <div class="postwall">
 
-              <h5><a href="#/detail/[[postwall.senderid]]">[[postwall.sendername]]</a></h5>
+              <!-- <h5><a href="#/detail/[[postwall.senderid]]">[[postwall.sendername]]</a></h5> -->
+              
+              <div id = "deletewall">
+                  <h5 style = "width:85%; display:inline-flex;"><a href="#/detail/[[postwall.senderid]]">[[postwall.sendername]]</a></h2>
+                  <template is="dom-if" if="[[_shouldeditprofile]]">
+                    <paper-icon-button
+                      class="menu-btn"
+                      icon="delete"
+                      on-click = "deletewall"
+                      data-args="[[postwall.$key]]"
+                      aria-label="Delete Wall Post"
+                      style="float:right; color: black; height: 35px; width: 35px;">
+                    </paper-icon-button>          
+                  </template>
+              </div>
+
               <hr style="margin-left:5px; margin-right:5px;">
               <p>[[postwall.message]]</p>
 
@@ -632,7 +687,7 @@
           
       <div id = "chatlooper" class="chatloopouter" style="margin-top: 60px; margin-bottom: 90px; width:100%;">      
       <template is="dom-repeat" items="[[chatdata]]" as="chat">  
-          <template is="dom-if" if="[[isLoggedInSender(chat.senderid)]]">
+          <template is="dom-if" if="[[isLoggedInSenderNew(chat.senderid)]]">
             <div class="chatloop" style="margin-bottom: 5px;overflow: hidden;  margin-left:10px; margin-right:10px;">
               <div style="
                 float: right;
@@ -647,7 +702,7 @@
               </div>
             </div>
           </template>
-          <template is="dom-if" if="[[!isLoggedInSender(chat.senderid)]]">
+          <template is="dom-if" if="[[!isLoggedInSenderNew(chat.senderid)]]">
             <div class="chatloop" style="margin-bottom: 5px;overflow: hidden; margin-left:10px; margin-right:10px;">
               <div style="
                 float: left;
@@ -687,7 +742,21 @@
       
       <div class="post">
 
-        <h2><a href="#/viewevent/[[post.$key]]">[[post.title]] - on - [[post.date]]</a></h2>
+
+        <div id = "deletepost">
+
+          <h2 style = "width:85%; display:inline-flex;"><a href="#/viewevent/[[post.$key]]">[[post.title]] - on - [[post.date]]</a></h2>
+          <template is="dom-if" if="[[_shouldeditprofile]]">
+                <paper-icon-button
+                  class="menu-btn"
+                  icon="delete"
+                  on-click = "deletepost"
+                  data-args="[[post.$key]]"
+                  aria-label="Delete Post"
+                  style="float:right; color: black; height: 40px; width: 40px;">
+                </paper-icon-button>          
+          </template>
+        </div>
         <h4><a href="#/detail/[[post.uid]]">[[post.author]]</a></h4>
         <hr>
         <p>[[post.description]]</p>
@@ -701,7 +770,26 @@
 
     </iron-pages>
     </div>
+
+    <paper-dialog id="actionsdelete" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop>
+      <h2 style=" margin-top:10px; margin-left:10px; margin-right:10px; text-align:center;">Are you sure you want to Delete this post?</h2>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button on-click="deletetheevent" dialog-confirm autofocus>Delete</paper-button>
+      </div>
+    </paper-dialog>
     
+
+    <paper-dialog id="actionsdeletewall" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop>
+      <h2 style=" margin-top:10px; margin-left:10px; margin-right:10px; text-align:center;">Are you sure you want to Delete this Wall Post?</h2>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button on-click="deletethewall" dialog-confirm autofocus>Delete</paper-button>
+      </div>
+    </paper-dialog>
+
+    
+
   </template>
 
   <script>
@@ -716,6 +804,8 @@
 
         category: Object,
 
+        user: Object,
+            
         chatdata: {
             type: Object,
             notify : true
@@ -732,7 +822,23 @@
           value : true
         },
 
+        _shouldeditprofile : {
+          type: Boolean,
+          value : false,
+          notify : true
+        },
+
         categoryName : {
+          type: String,
+          value : ''
+        },
+
+        deletepostid : {
+          type: String,
+          value : ''
+        },
+
+        deletewallpostid : {
           type: String,
           value : ''
         },
@@ -750,8 +856,13 @@
         '_itemChanged(item, visible)',
         '_categoryChanged(category, visible)',
         '_routeChanged(route)',
-        'chatdataChanged(chatdata.*)'
+        'chatdataChanged(chatdata.*)',
+        '_routePageChanged(routeData)',
+        '_userChanged(user)'
       ],
+
+      
+
 
       chatdataChanged: function (newData) {
     // do something when the query returns values
@@ -769,7 +880,41 @@
           this.categoryName = 'profile';
           this.$.inputChat.value = '';
           this.$.inputWall.value = '';
+
+          
+
+          if(this.routeData && this.routeData.item && this.loggedin != null && this.loggedin.uid == this.routeData.item){
+            this._shouldeditprofile = true;
+          }
+          else{
+            this._shouldeditprofile = false; 
+          }
+
+
         }
+      },
+
+      _routePageChanged: function(routeData) {
+        
+        if(routeData && routeData.item && this.user != null && this.user.uid == routeData.item && this.route && this.route.prefix == '/detail'){
+            this._shouldeditprofile = true;
+          }
+          else{
+            this._shouldeditprofile = false; 
+          }
+
+      },
+
+      _userChanged: function(user) {
+        
+        
+          if(this.routeData && this.routeData.item && this.user != null && this.user.uid == this.routeData.item && this.route && this.route.prefix == '/detail'){
+            this._shouldeditprofile = true;
+          }
+          else{
+            this._shouldeditprofile = false; 
+          }
+
       },
 
       changeState: function(e) {
@@ -793,8 +938,64 @@
         
       },
 
-      isLoggedInSender: function(senderid){
-        if(this.user.uid == senderid){
+      deletepost: function(e) {
+
+        //var args = Polymer.dom(e).path[1].getAttribute('data-args');
+
+        console.log('e');
+        console.log(e);
+        //var args = e.target.dataset.args.split(',');
+
+        var post = e.model.post;
+        console.log('post');
+        console.log(post);
+        //var args = e.target.getAttribute('data-args').split(',');
+        this.deletepostid = post.$key;
+        this.$.actionsdelete.open();
+        
+      },
+
+      deletetheevent: function(e){
+
+          this.$.auth.app.database().ref().child('posts/'+this.deletepostid).remove();
+          this.$.actionsdelete.close();
+
+          var snackbar  = document.createElement('shop-snackbar');
+          Polymer.dom(this.root).appendChild(snackbar);
+          
+          Polymer.dom(snackbar).innerHTML = 'Event Deleted Successfully';
+          snackbar.open();
+          this.deletepostid = '';
+              
+
+      },
+
+      deletewall: function(e) {
+
+        var post = e.model.postwall;
+        this.deletewallpostid = post.$key;
+        this.$.actionsdeletewall.open();
+        
+      },
+
+      deletethewall: function(e){
+
+          this.$.auth.app.database().ref().child('profilewall/'+this.user.uid+'/'+this.deletewallpostid).remove();
+          this.$.actionsdeletewall.close();
+
+          var snackbar  = document.createElement('shop-snackbar');
+          Polymer.dom(this.root).appendChild(snackbar);
+          
+          Polymer.dom(snackbar).innerHTML = 'Wall Post Deleted Successfully';
+          snackbar.open();
+          this.deletewallpostid = '';
+              
+
+      },
+
+      isLoggedInSenderNew: function(senderid){
+        
+        if(this.user != null && this.user.uid == senderid){
           return true;
         }
         else{
@@ -805,11 +1006,11 @@
       _itemChanged: function(item, visible) {
         if (visible && this.route.prefix == '/detail') {
           
-          this.debounce('item-change', function() {
+          /*this.debounce('item-change', function() {*/
             // The item description contains escaped HTML (e.g. "&lt;br&gt;"), so we need to
             // unescape it ("<br>") and set it as innerHTML.
             
-            var text = item ? item.shortBio : '';
+            /*var text = item ? item.shortBio : '';
             if(this.$.desc)
               this.$.desc.innerHTML = this._unescapeText(text);
 
@@ -825,13 +1026,13 @@
             
             text = item ? item.mobileNum : '';
             if(this.$.mobileNum)
-              this.$.mobileNum.innerHTML = this._unescapeText(text);
+              this.$.mobileNum.innerHTML = this._unescapeText(text);*/
 
             this.fire('change-section', {
               category: item.category,
               title: item.name
             });
-          });
+          /*});*/
         }
       },
 
@@ -854,15 +1055,6 @@
 
       _formatPrice: function(price) {
         return price ? '$' + price.toFixed(2) : '';
-      },
-
-      _addToCart: function() {
-        // This event will be handled by shop-app.
-        this.fire('add-cart-item', {
-          item: this.item,
-          quantity: parseInt(this.$.quantitySelect.value, 10),
-          size: this.$.sizeSelect.value
-        });
       },
 
       _openFb: function(object){
@@ -994,6 +1186,11 @@
       _computePathPosts: function(key,imageurl){
 
         return 'https://firebasestorage.googleapis.com/v0/b/note-app-firebase-5320d.appspot.com/o/posts%2F'+key+'%2F'+imageurl+'?alt=media';
+      },
+
+      openlogout: function(){
+        //this.$.actions.open();
+        this.fire('log-out', null);
       }
 
     });

@@ -178,15 +178,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       id="randr"
       path="/randr"
       order-by-child="_timestamp"
-      data="{{rewardsandrecog}}">
+      data="{{categoryMembers}}">
     </firebase-query>
 
-    <app-indexeddb-mirror
+    <!-- <app-indexeddb-mirror
         session="[[user.uid]]"
         key="rewardsandrecog"
         data="{{rewardsandrecog}}"
         persisted-data="{{categoryMembers}}">
-    </app-indexeddb-mirror>
+    </app-indexeddb-mirror> -->
 
     <app-header role="navigation" id="header" effects="waterfall" hidden="[[!signedin]]" condenses reveals>
       <app-toolbar>
@@ -198,7 +198,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               aria-label="Categories">
           </paper-icon-button>
         </div>
-        <div class="logo" main-title><a href="#/" aria-label="SHOP Home">PROJECTAGRAM</a></div> 
+        <div class="logo" main-title><a href="#/" aria-label="SHOP Home">PROJECTAGRAM</a></div>
+        <div class="left-bar-item" style="margin-right:20px;">
+          <paper-icon-button
+              class="menu-btn"
+              icon="account-circle"
+              on-click="openlogout"
+              aria-label="Sign Out"
+              style="color: white; height: 50px; width: 50px;">
+          </paper-icon-button>
+        </div> 
       </app-toolbar>
     </app-header>
 
@@ -210,7 +219,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </template>
     </ul>
 
-    <paper-fab title="Add R&R" elevation="5" on-tap="newRandR" icon="add"></paper-fab>
+    <template is="dom-if" if="[[canadd]]">
+      <paper-fab title="Add R&R" elevation="5" on-tap="newRandR" icon="add"></paper-fab>
+    </template>
 
   </template>
 
@@ -263,6 +274,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       newRandR: function() {
         this.set("route.path", "/addrandr");
+      },
+
+      openlogout: function(){
+        //this.$.actions.open();
+        this.fire('log-out', null);
       }   
 
     });

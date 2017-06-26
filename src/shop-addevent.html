@@ -11,7 +11,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
-<link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-scroll-effects/effects/waterfall.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
@@ -274,6 +273,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </paper-icon-button>
         </div>
         <div class="logo" main-title><a href="#/" aria-label="SHOP Home">PROJECTAGRAM</a></div> 
+        <div class="left-bar-item" style="margin-right:20px;">
+          <paper-icon-button
+              class="menu-btn"
+              icon="account-circle"
+              on-click="openlogout"
+              aria-label="Sign Out"
+              style="color: white; height: 50px; width: 50px;">
+          </paper-icon-button>
+        </div>
       </app-toolbar>
     </app-header>
 
@@ -684,7 +692,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   // Write the new post's data simultaneously in the posts list and the user's post list.
           var updates = {};
           updates['/posts/' + newPostKey] = postData;
-          updates['/user-posts/' + this.user.uid + '/' + newPostKey] = postData;
+          //updates['/user-posts/' + this.user.uid + '/' + newPostKey] = postData;
 
           app.database().ref().update(updates);
 
@@ -1125,7 +1133,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   var x = file.name;
                   x = x.replace(/\.[^/.]+$/, "");
                   app.database().ref().child('posts/'+keypost+'/images/'+x).set(file.name);
-                  app.database().ref().child('/user-posts/' + current.user.uid + '/'+keypost+'/images/'+x).set(file.name);
+                  /*app.database().ref().child('/user-posts/' + current.user.uid + '/'+keypost+'/images/'+x).set(file.name);*/
 
                   current.uploadedcnt = current.uploadedcnt+1;
                   var len = current.files.length;
@@ -1201,6 +1209,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 };
                 reader.readAsDataURL(file);
             });
+      },
+
+      openlogout: function(){
+        //this.$.actions.open();
+        this.fire('log-out', null);
       }   
 
     });

@@ -22,6 +22,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/neon-animation/animations/scale-down-animation.html">
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../bower_components/neon-animation/animations/fade-out-animation.html">
 <dom-module id="sa-login">
   <template>
     <style include="shop-common-styles shop-button shop-form-styles shop-input shop-select shop-checkbox">
@@ -63,6 +64,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         pointer-events: auto;
       }
 
+      #forgetForm {
+        margin: 20px;
+      }
       
       paper-button.google {
           color: white !important;
@@ -242,10 +246,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
               <shop-button fullwidth responsive id="submitBox">
                   <input class ="fullwidth" type="button" on-click="_submit" value="Sign In">
-                </shop-button>
+              </shop-button>
+              
               
               <p id="errmsg">[[loginerrormsg]]</p>  
 
+              <!-- <p style="text-align:center; margin:0px; margin-bottom:5px;"><a on-click = "openforform">Forgot Password</a></p> -->
+
+              <p style="text-align:center; margin:0px; margin-bottom:5px;">To Register, Contact:</p>
+              <p style="text-align:center; margin:0px; margin-bottom:5px;"><b>Amit Agarwal</b></p>
+              <p style="text-align:center; margin:0px; margin-bottom:5px;"><b>( amitagarwal3@deloitte.com )</b></p>
+              <p style="text-align:center; margin:0px; margin-bottom:5px;"><b>( 7405237842 )</b></p>  
+
+              <shop-button style= "margin-top:10px;" fullwidth id="submitBox">
+                  <input class ="fullwidth" type="button" on-click="openforform" value="Forgot Password">
+              </shop-button>
 
               </section>
 
@@ -253,6 +268,42 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           </form>
       </div>
 
+      <paper-dialog id="actions" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop>
+            <form
+              id="forgetForm"
+              is="iron-form"
+              method="post"
+            >
+
+            <div class="grid">
+              <section>
+
+                <div class="row input-row">
+                  <shop-input>
+                    <input type="email" id="accountForEmail" name="accountForEmail"
+                        placeholder="Email" autofocus required
+                        aria-labelledby="accountForEmailLabel">
+                    <shop-md-decorator error-message="Invalid Email" aria-hidden="true">
+                      <label id="accountForEmailLabel">Email</label>
+                      <shop-underline></shop-underline>
+                    </shop-md-decorator>
+                  </shop-input>
+                </div>
+                
+              <!-- <shop-button fullwidth responsive id="submitBox">
+                  <input class ="fullwidth" type="button" on-click="_submit" value="Sign In">
+              </shop-button> -->
+              
+              </section>
+
+            </div>
+          
+            <div class="buttons">
+              <paper-button dialog-dismiss>Cancel</paper-button>
+              <paper-button on-click="_submitfor" autofocus>Send Email</paper-button>
+            </div>
+      </form>
+    </paper-dialog>
 
 
   <!-- </paper-dialog> -->
@@ -289,7 +340,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           // 3) Uncomment `this.$.checkoutForm.submit()`.
           
           var current = this;
-          this.$.auth.signInWithEmailAndPassword(this.$.accountEmail.value, this.$.accountPassword.value).catch(function(error) {
+          this.$.auth.signInWithEmailAndPassword(this.$.accountEmail.value, this.$.accountPassword.value).then(function(firebaseUser) {
+              current._reset();
+              console.log('Login Success');
+          }).catch(function(error) {
               var errorCode = error.code;
               var errorMessage = error.message;
 
@@ -300,6 +354,50 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               
   // ...
           });
+        }
+      },
+
+      _submitfor: function(e) {
+        if (this._validateForgetForm()) {
+          // To send the form data to the server:
+          // 2) Remove the code below.
+          // 3) Uncomment `this.$.checkoutForm.submit()`.
+          
+          var current = this;
+          this.$.auth.sendPasswordResetEmail(this.$.accountForEmail.value).then(function() {
+  // Email sent.
+              current.$.actions.close();
+              current._resetFor();
+
+              var snackbar  = document.createElement('shop-snackbar');
+              Polymer.dom(current.root).appendChild(snackbar);
+          
+              Polymer.dom(snackbar).innerHTML = 'Reset Password Mail has been sent to your email id';
+              snackbar.open();
+              current.$.actions.close();
+
+          }, function(error) {
+  // An error happened.
+              var errorCode = error.code;
+              var errorMessage = error.message;
+
+              var snackbar  = document.createElement('shop-snackbar');
+              Polymer.dom(current.root).appendChild(snackbar);
+          
+              Polymer.dom(snackbar).innerHTML = errorMessage;
+              snackbar.open();
+              current.$.actions.close();
+              
+          });
+          /*then(function() {
+              current.$.actions.close();
+              current._resetFor();
+              
+              //console.log('Login Success');
+          }).catch(function(error) {
+              var errorCode = error.code;
+              var errorMessage = error.message;
+          });*/
         }
       },
 
@@ -338,6 +436,62 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
 
         return !firstInvalid;
+      },
+
+      _validateForgetForm: function() {
+        var form = this.$.forgetForm;
+        var firstInvalid = false;
+        for (var el, i = 0; el = form.elements[i], i < form.elements.length; i++) {
+          if (el.checkValidity()) {
+            el.removeAttribute('aria-invalid');
+          } else {
+            if (!firstInvalid) {
+              // announce error message
+              if (el.nextElementSibling) {
+                this.fire('announce', el.nextElementSibling.getAttribute('error-message'));
+              }
+              if (el.scrollIntoViewIfNeeded) {
+                // safari, chrome
+                el.scrollIntoViewIfNeeded();
+              } else {
+                // firefox, edge, ie
+                el.scrollIntoView(false);
+              }
+              el.focus();
+              firstInvalid = true;
+            }
+            el.setAttribute('aria-invalid', 'true');
+          }
+        }
+
+        return !firstInvalid;
+      },
+
+      _reset: function() {
+        var form = this.$.loginForm;
+        form.reset();
+        this._unescapeText(' ');
+
+        // Remove the `aria-invalid` attribute from the form inputs.
+        for (var el, i = 0; el = form.elements[i], i < form.elements.length; i++) {
+          el.removeAttribute('aria-invalid');
+        }
+      },
+      _resetFor: function() {
+        var form = this.$.forgetForm;
+        form.reset();
+        this._unescapeText(' ');
+
+        // Remove the `aria-invalid` attribute from the form inputs.
+        for (var el, i = 0; el = form.elements[i], i < form.elements.length; i++) {
+          el.removeAttribute('aria-invalid');
+        }
+      },
+
+      openforform: function(){
+
+        this.$.actions.open();
+        this._resetFor();
       }
 
     });

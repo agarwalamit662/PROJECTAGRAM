@@ -16,6 +16,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="shop-list-item.html">
 <link rel="import" href="shop-tabs.html">
 <link rel="import" href="shop-tab.html">
+<link rel="import" href="shop-icons.html">
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-scroll-effects/effects/waterfall.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
@@ -23,6 +24,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/neon-animation/animations/scale-up-animation.html">
+<link rel="import" href="../bower_components/neon-animation/animations/scale-down-animation.html">
+<link rel="import" href="../bower_components/neon-animation/animations/fade-out-animation.html">
+
 <dom-module id="shop-list">
 
   <template>
@@ -57,6 +66,67 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       .left-bar-item {
         width: 40px;
+      }
+
+      .send-messagewall {
+          margin-top: 30px;
+          margin-left: 20px;
+          margin-right: 20px;
+      }
+
+      
+
+      #checkoutFormWall{
+        display: flex;
+        width: 100%;
+        margin-top: 10px;
+        background: white;
+      }
+
+      #inputWall{
+            -ms-flex: 1 1 0.000000001px;
+            -webkit-flex: 1;
+            flex: 1;
+            -webkit-flex-basis: 0.000000001px;
+            flex-basis: 0.000000001px;
+      }
+
+      .postwall {
+        width: 100%;
+        margin-top: 10px;
+        display: inline-block;
+        border-radius: 10px;
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+                    0 1px 5px 0 rgba(0, 0, 0, 0.12),
+                    0 3px 1px -2px rgba(0, 0, 0, 0.2);
+      }
+
+      .postouterwall {
+        margin-top: 10px;
+        margin-left: 20px;
+        margin-right: 20px; 
+      }
+
+      .postwall h2,h4 {
+        margin: 2px;
+        padding: 2px;
+      }
+
+      .postwall p,h5 {
+        margin: 2px;
+        padding: 2px; 
+        margin-left: 10px;
+        margin-right: 10px;
+      }
+
+      .postwall h5 {
+        color: darkslateblue;
+      }
+
+      .postwall h5 a{
+            color: darkslateblue;
+            text-decoration: none;
+            pointer-events: auto;
       }
 
       app-header {
@@ -146,6 +216,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           display: none;
         }
 
+        .postouterwall {
+          margin-top: 10px;
+          margin-left: 10px;
+          margin-right: 10px; 
+        }
+
+        .send-messagewall {
+          margin-top: 10px;
+          margin-left: 10px;
+          margin-right: 10px;
+        }
+
         .grid  li {
           -webkit-flex-basis: 50%;
           flex-basis: 50%;
@@ -166,20 +248,38 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <!-- <template is="dom-if" if="[[_computeCall(route,visible)]]"> -->
               
-
+    <firebase-auth
+        id="auth"
+        provider="email"
+        signed-in="{{signedIn}}"
+        user="{{user}}"
+        on-error="handleError">
+    </firebase-auth>
 
     <firebase-document
       path="/teams/[[routeData.team]]"
-      data="{{categoryFirebase}}">
+      data="{{category}}">
     </firebase-document> 
 
+
+    <firebase-query
+      id="announcements"
+      path="/announcements/[[routeData.team]]"
+      order-by-child="_timestamp"
+      data="{{profilewalldata}}">
+    </firebase-query>
+
+    <firebase-document
+      path="/users/[[user.uid]]"
+      data="{{loguserFirebase}}">
+    </firebase-document>
     
-    <app-indexeddb-mirror
+    <!-- <app-indexeddb-mirror
         session="[[user.uid]]"
         key="[[_computePath(routeData.team,visible)]]"
         data="{{categoryFirebase}}"
         persisted-data="{{category}}">
-    </app-indexeddb-mirror>
+    </app-indexeddb-mirror> -->
 
     <app-header role="navigation" id="header" effects="waterfall" hidden="[[!signedin]]" condenses reveals>
       <app-toolbar>
@@ -191,7 +291,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               aria-label="Categories">
           </paper-icon-button>
         </div>
-        <div class="logo" main-title><a href="#/" aria-label="SHOP Home">PROJECTAGRAM</a></div> 
+        <div class="logo" main-title><a href="#/" aria-label="SHOP Home">PROJECTAGRAM</a></div>
+        <div class="left-bar-item" style="margin-right:20px;">
+          <paper-icon-button
+              class="menu-btn"
+              icon="account-circle"
+              on-click="openlogout"
+              aria-label="Sign Out"
+              style="color: white; height: 50px; width: 50px;">
+          </paper-icon-button>
+        </div>
       </app-toolbar>
       <div id="tabContainer" sticky$="[[_shouldShowTabs]]">
         <shop-tabs
@@ -219,24 +328,24 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     
 
 
-    <div style="margin-top:130px;">
-    <shop-image
+    <div style="margin-top:140px;">
+    <!-- <shop-image
         alt="[[category.title]]"
         src="[[teamName]]"
-        placeholder-img="[[category.placeholder]]" class="hero-image"></shop-image>    
+        placeholder-img="[[category.placeholder]]" class="hero-image"></shop-image> -->    
 
     <firebase-document
       path="/teams/[[routeData.team]]/members"
-      data="{{categoryMembersFirebase}}">
+      data="{{categoryMembers}}">
     </firebase-document>
 
     
-    <app-indexeddb-mirror
+    <!-- <app-indexeddb-mirror
         session="[[user.uid]]"
         key="[[_computePathMembers(routeData.team,visible)]]"
         data="{{categoryMembersFirebase}}"
         persisted-data="{{categoryMembers}}">
-    </app-indexeddb-mirror>
+    </app-indexeddb-mirror> -->
 
     <div class="main-frame">
       <iron-pages selected="[[categoryName]]" attr-for-selected="state">
@@ -260,18 +369,74 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
        </div>
        
        <!-- Success message UI -->
-        <header state="announcements">
-          <h1>Thank you</h1>
+        <div state="announcements">
+          <!-- <h1>Thank you</h1>
           <p>Bye</p>
           <shop-button responsive>
             <a href="#/home">Go to Home</a>
-          </shop-button>
-        </header>
+          </shop-button> -->
+
+          <template is="dom-if" if="[[_cansubmit(categoryMembers,visible)]]">
+
+
+          <div id="checkoutFormDiv" class="send-messagewall">
+              <form
+                    id="checkoutFormWall"
+                    is="iron-form"
+                    method="post"
+                    >
+                <!-- <paper-input flex="" label="Write Something on the wall" id="inputWall" name="inputWall"></paper-input> -->
+                <paper-textarea flex="" label="Write Something on the team wall" id="inputWall" name="inputWall" value="{{textareavalue}}"></paper-textarea>
+                <paper-fab icon="send" id="sendWallButton" on-tap="_submitWall" role="button" tabindex="0" aria-label="send"></paper-fab>
+              </form>
+          </div>
+          </template>
+
+          <div id = "wallmessages" class = "postouterwall">
+
+            
+
+            <template is="dom-repeat" items="[[profilewalldata]]" as="postwall">  
+      
+              <div class="postwall">
+
+               <div id = "deletewall">
+                  <h5 style = "width:85%; display:inline-flex;"><a href="#/detail/[[postwall.senderid]]">[[postwall.sendername]]</a></h2>
+                  <template is="dom-if" if="[[_cansubmit(categoryMembers,visible)]]">
+                    <paper-icon-button
+                      class="menu-btn"
+                      icon="delete"
+                      on-click = "deletewall"
+                      data-args="[[postwall.$key]]"
+                      aria-label="Delete Wall Post"
+                      style="float:right; color: black; height: 40px; width: 40px;">
+                    </paper-icon-button>          
+                  </template>
+              </div>
+
+              <!-- <h5><a href="#/detail/[[postwall.senderid]]">[[postwall.sendername]]</a></h5> -->
+              <p>[[postwall.message]]</p>
+
+              </div>  
+              
+            </template>
+
+          </div>
+
+        </div>
 
 
      </iron-pages>
    </div>
  </div>
+
+  <paper-dialog id="actionsdeletewall" entry-animation="scale-up-animation" exit-animation="fade-out-animation" with-backdrop>
+      <h2 style=" margin-top:10px; margin-left:10px; margin-right:10px; text-align:center;">Are you sure you want to Delete this Wall Post?</h2>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button on-click="deletethewall" dialog-confirm autofocus>Delete</paper-button>
+      </div>
+    </paper-dialog>
 
   <!-- </template> -->
   </template>
@@ -294,9 +459,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           value : true
         },
 
+        deletewallpostid : {
+          type: String,
+          value : ''
+        },
+
         categoryName : {
           type: String,
           value : ''
+        },
+
+        textareavalue : {
+          type: String,
+          value : '',
+          notify : true
         },
 
         teamName : {
@@ -354,6 +530,31 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         this.categoryName = 'members';
 
+        this.textareavalue = '';
+
+      },
+
+      deletewall: function(e) {
+
+        var post = e.model.postwall;
+        this.deletewallpostid = post.$key;
+        this.$.actionsdeletewall.open();
+        
+      },
+
+      deletethewall: function(e){
+
+          this.$.auth.app.database().ref().child('announcements/'+this.routeData.team+'/'+this.deletewallpostid).remove();
+          this.$.actionsdeletewall.close();
+
+          var snackbar  = document.createElement('shop-snackbar');
+          Polymer.dom(this.root).appendChild(snackbar);
+          
+          Polymer.dom(snackbar).innerHTML = 'Wall Post Deleted Successfully';
+          snackbar.open();
+          this.deletewallpostid = '';
+              
+
       },
 
       changeState: function(e) {
@@ -364,6 +565,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.categoryName = args[0];
         var scrollTop = 0;
         Polymer.AppLayout.scroll({ top: scrollTop, behavior: 'silent' });
+        this.textareavalue = '';
       },
 
       _getItemHref: function(item) {
@@ -435,6 +637,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
 
         },
+
+        _cansubmit: function(obj,visible) {
+          if (visible) {
+
+            var arr = this._toArray(obj,visible);
+
+            if(arr && arr.length > 0){
+              for(var i= 0 ; i < arr.length ; i++){
+
+                if(arr[i].name == this.user.uid){
+                  return true;
+                }
+
+              }
+            }
+
+          }
+          return false;
+        },
+
         _arrLen: function(obj,visible) {
            
           if (visible)  {
@@ -474,7 +696,53 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               return null;
             }
 
-        } 
+        },
+
+        _submitWall: function(e) {
+
+          console.log('textareavalue');
+          console.log(this.textareavalue);
+          console.log('textareavalue');
+        
+          if(this.textareavalue == null || this.textareavalue.length == 0){
+
+            var snackbar  = document.createElement('shop-snackbar');
+            Polymer.dom(this.root).appendChild(snackbar);
+          
+            Polymer.dom(snackbar).innerHTML = 'Message is Empty';
+            snackbar.open();
+          }else{
+            
+            var app = this.$.auth.app;
+            var _timestamp = -1*Date.now();
+            var postData = {
+              sendername: this.loguserFirebase.name,
+              senderid: this.user.uid,
+              message: this.textareavalue,
+              _timestamp: _timestamp
+            };
+
+  // Get a key for a new Post.
+          var newPostKey = app.database().ref().child('announcements').child(this.routeData.team).push().key;
+
+  // Write the new post's data simultaneously in the posts list and the user's post list.
+          var updates = {};
+          updates['/announcements/' + this.routeData.team+'/'+newPostKey] = postData;
+          //updates['/chats/' + this.routeData.item+'/'+this.user.uid+'/'+newPostKey] = postData;
+          app.database().ref().update(updates);
+
+
+          this.textareavalue = '';     
+
+          }
+          
+        
+      },
+
+      openlogout: function(){
+        //this.$.actions.open();
+        this.fire('log-out', null);
+      } 
 
     });
 
