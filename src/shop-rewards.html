@@ -16,7 +16,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="shop-rewardlist-item.html">
 <link rel="import" href="shop-icons.html">
 <link rel="import" href="../bower_components/paper-fab/paper-fab.html">
-<link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
@@ -168,11 +167,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <header>
       <h1>Rewards and Recoginition</h1>
     </header>
-
-    <!-- <firebase-document
-      path="/randr"
-      data="{{rewardsandrecog}}">
-    </firebase-document> -->    
+    
 
     <firebase-query
       id="randr"
@@ -180,13 +175,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       order-by-child="_timestamp"
       data="{{categoryMembers}}">
     </firebase-query>
-
-    <!-- <app-indexeddb-mirror
-        session="[[user.uid]]"
-        key="rewardsandrecog"
-        data="{{rewardsandrecog}}"
-        persisted-data="{{categoryMembers}}">
-    </app-indexeddb-mirror> -->
 
     <app-header role="navigation" id="header" effects="waterfall" hidden="[[!signedin]]" condenses reveals>
       <app-toolbar>

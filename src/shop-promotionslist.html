@@ -18,7 +18,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-scroll-effects/effects/waterfall.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
@@ -147,35 +146,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     </style>
 
-    <!--
-      app-route provides the name of the category.
-    -->
     <app-route
         route="[[route]]"
         pattern="/:category"
         data="{{routeData}}"></app-route>
 
-    <!-- <template is="dom-if" if="[[_computeCall(route,visible)]]">     -->
-
+    
     <firebase-document
       path="/promotions/[[routeData.category]]"
       data="{{category}}">
     </firebase-document>
-
-    <!-- <app-indexeddb-mirror
-        session="[[user.uid]]"
-        key="[[_computePath(routeData.category,visible)]]"
-        data="{{categoryRewardsFirebase}}"
-        persisted-data="{{category}}">
-    </app-indexeddb-mirror>  -->   
-
-
-    <!-- <shop-image
-        alt="[[category.date]]"
-        src="../images/empty_image_rr.png"
-        placeholder-img="data:image/jpeg;base64,/9j/4QAYRXhpZgAASUkqAAgAAAAAAAAAAAAAAP/sABFEdWNreQABAAQAAAAeAAD/7gAOQWRvYmUAZMAAAAAB/9sAhAAQCwsLDAsQDAwQFw8NDxcbFBAQFBsfFxcXFxcfHhcaGhoaFx4eIyUnJSMeLy8zMy8vQEBAQEBAQEBAQEBAQEBAAREPDxETERUSEhUUERQRFBoUFhYUGiYaGhwaGiYwIx4eHh4jMCsuJycnLis1NTAwNTVAQD9AQEBAQEBAQEBAQED/wAARCAADAA4DASIAAhEBAxEB/8QAXAABAQEAAAAAAAAAAAAAAAAAAAIEAQEAAAAAAAAAAAAAAAAAAAACEAAAAwYHAQAAAAAAAAAAAAAAERMBAhIyYhQhkaEDIwUVNREBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8A3dkr5e8tfpwuneJITOzIcmQpit037Bw4mnCVNOpAAQv/2Q==" class="hero-image"
-        spanvalue="[[category.date]]" spandetail="[[category.discussion]]"
-        ></shop-image> -->
 
     <app-header role="navigation" id="header" effects="waterfall" hidden="[[!signedin]]" condenses reveals>
       <app-toolbar>
@@ -207,18 +187,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       
     </div>    
 
-    <firebase-document
-      path="/promotions/[[routeData.category]]/winners"
-      data="{{categoryWinnersFirebase}}">
-    </firebase-document>    
-
-    <app-indexeddb-mirror
-        session="[[user.uid]]"
-        key="[[_computePathMembers(routeData.category,visible)]]"
-        data="{{categoryWinnersFirebase}}"
-        persisted-data="{{winnerMembers}}">
-    </app-indexeddb-mirror>
-
     <header>
       <h1>The Promoted Team Members Are:</h1>
     </header>
@@ -226,14 +194,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 
     <ul class="grid" hidden$="[[failure]]">
-      <template is="dom-repeat" items="[[_toArray(winnerMembers,visible)]]" initial-count="4">
+      <template is="dom-repeat" items="[[_toArray(category.winners,visible)]]" initial-count="4">
         <li>
           <shop-list-itemcongo item="[[item]]"></shop-list-itemcongo>
         </li>
       </template>
     </ul>
 
-    <!-- </template> -->
   </template>
 
   <script>
@@ -270,8 +237,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       observers: [
-        '_categoryChanged(category, visible)'
+        '_categoryChanged(category, visible)',
+        '_routeChanged(route)'
       ],
+
+      _routeChanged: function(route){
+        
+
+        Polymer.AppLayout.scroll({ top: 0, behavior: 'silent' });
+
+      },
 
       _getListItems: function(items) {
         // Return placeholder items when the items haven't loaded yet.
@@ -363,18 +338,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
 
       _toArray: function(obj,visible) {
-        if(visible){
+        /*if(visible){*/
             return Object.keys(obj).map(function(key) {
                 return {
                     name: key,
                     value: obj[key]
                 };
             });
-        }
+        /*}*/
         },
         _arrLen: function(obj,visible) {
             
-            if(visible){           
+            /*if(visible){           */
 
             var count = Object.keys(obj).length;
             
@@ -383,7 +358,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
             var pluralizedQ = count === 1 ? 'item' : 'items';
             return  '(' + count + ' ' + pluralizedQ + ')';
-          }
+          /*}*/
 
         },
 

@@ -20,7 +20,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-scroll-effects/effects/waterfall.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
@@ -274,13 +273,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       data="{{loguserFirebase}}">
     </firebase-document>
     
-    <!-- <app-indexeddb-mirror
-        session="[[user.uid]]"
-        key="[[_computePath(routeData.team,visible)]]"
-        data="{{categoryFirebase}}"
-        persisted-data="{{category}}">
-    </app-indexeddb-mirror> -->
-
     <app-header role="navigation" id="header" effects="waterfall" hidden="[[!signedin]]" condenses reveals>
       <app-toolbar>
         <div class="left-bar-item">
@@ -329,24 +321,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 
     <div style="margin-top:140px;">
-    <!-- <shop-image
-        alt="[[category.title]]"
-        src="[[teamName]]"
-        placeholder-img="[[category.placeholder]]" class="hero-image"></shop-image> -->    
-
-    <firebase-document
-      path="/teams/[[routeData.team]]/members"
-      data="{{categoryMembers}}">
-    </firebase-document>
-
     
-    <!-- <app-indexeddb-mirror
-        session="[[user.uid]]"
-        key="[[_computePathMembers(routeData.team,visible)]]"
-        data="{{categoryMembersFirebase}}"
-        persisted-data="{{categoryMembers}}">
-    </app-indexeddb-mirror> -->
-
     <div class="main-frame">
       <iron-pages selected="[[categoryName]]" attr-for-selected="state">
         <div state="members">
@@ -354,13 +329,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           <header style = "margin-top: 10px;">
             <h1>[[category.title]]</h1>
-            <span>[[_arrLen(categoryMembers,visible)]]</span>
+            <span>[[_arrLen(category.members,visible)]]</span>
           </header>
 
 
 
           <ul class="grid" hidden$="[[failure]]">
-            <template is="dom-repeat" items="[[_toArray(categoryMembers,visible)]]" initial-count="4">
+            <template is="dom-repeat" items="[[_toArray(category.members,visible)]]" initial-count="4">
               <li>
                 <a href$="[[_getItemHref(item)]]"><shop-list-item item="[[item]]"></shop-list-item></a>
               </li>
@@ -376,7 +351,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <a href="#/home">Go to Home</a>
           </shop-button> -->
 
-          <template is="dom-if" if="[[_cansubmit(categoryMembers,visible)]]">
+          <template is="dom-if" if="[[_cansubmit(category.members,visible)]]">
 
 
           <div id="checkoutFormDiv" class="send-messagewall">
@@ -514,6 +489,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _routeChanged: function(route){
         
+
+        Polymer.AppLayout.scroll({ top: 0, behavior: 'silent' });
         if(route && route.prefix == '/list'){
           this.categoryName = 'members';
           
@@ -616,30 +593,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
 
-      _computeCall: function(route,visible) {
-
-
-
-          if(visible && route && route.prefix == '/list'){
-            return true;
-          }
-          else return false;
-        },
-
       _toArray: function(obj,visible) {
-          if (visible) {
+          /*if (visible) {*/
               return Object.keys(obj).map(function(key) {
                   return {
                       name: key,
                       value: obj[key]
                   };
               });
-          }
+          /*}*/
 
         },
 
         _cansubmit: function(obj,visible) {
-          if (visible) {
+          /*if (visible) {*/
 
             var arr = this._toArray(obj,visible);
 
@@ -653,7 +620,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               }
             }
 
-          }
+          /*}*/
           return false;
         },
 

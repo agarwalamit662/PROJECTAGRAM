@@ -16,8 +16,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/app-layout/app-scroll-effects/effects/waterfall.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
-<link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
-
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/vaadin-combo-box/vaadin-combo-box.html">
@@ -247,14 +245,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       path="/users"
       data="{{users}}">
     </firebase-document>
-
-
-    <!-- <app-indexeddb-mirror
-        session="[[user.uid]]"
-        key="userslist"
-        data="{{usersdata}}"
-        persisted-data="{{users}}">
-    </app-indexeddb-mirror> -->
 
     <app-header role="navigation" id="header" effects="waterfall" hidden="[[!signedin]]" condenses reveals>
       <app-toolbar>

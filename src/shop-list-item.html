@@ -10,7 +10,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymerfire/polymerfire.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
-<link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
@@ -63,14 +62,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       path="/users/[[item.name]]"
       data="{{userData}}">
     </firebase-document>
-
-    <!-- <app-indexeddb-mirror
-        session="[[user.uid]]"
-        key="[[item.name]]"
-        data="{{userFirebase}}"
-        persisted-data="{{userData}}">
-    </app-indexeddb-mirror> -->
-
     
     <shop-image src="[[_computeImg(item.name)]]" alt="[[userData.name]]"></shop-image>
     <div class="title">[[userData.name]]</div>

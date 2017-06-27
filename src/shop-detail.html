@@ -15,7 +15,6 @@
 <link rel="import" href="shop-tab.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-fab/paper-fab.html">
-<link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-document.html">
 <link rel="import" href="../bower_components/polymerfire/firebase-query.html">
@@ -433,9 +432,6 @@
 
     </style>
 
-    <!--
-      app-route provides the name of the category and the item.
-    -->
     <firebase-auth
         id="auth"
         provider="email"
@@ -451,8 +447,6 @@
         route="[[route]]"
         pattern="/:item"
         data="{{routeData}}"></app-route>
-
-    <!-- <template is="dom-if" if="[[_computeCall(route,visible)]]">    -->
 
     <firebase-document
       path="/users/[[user.uid]]"
@@ -486,33 +480,12 @@
       data="{{item}}">
     </firebase-document>
 
-    <!-- <firebase-document
-      path="/users/[[routeData.item]]"
-      data="{{item}}">
-    </firebase-document> -->
-
-    <!-- <app-indexeddb-mirror
-        session="[[user.uid]]"
-        key="[[_computePath(routeData.item,visible)]]"
-        data="{{userFirebase}}"
-        persisted-data="{{item}}">
-    </app-indexeddb-mirror>
- -->
+    
     <firebase-document
       path="/teams/[[item.team]]"
       data="{{category}}">
     </firebase-document>
     
-
-    <!-- <app-indexeddb-mirror
-        session="[[user.uid]]"
-        key="[[_computePath(item.team,visible)]]"
-        data="{{categoryFirebase}}"
-        persisted-data="{{category}}">
-    </app-indexeddb-mirror> -->
-
-    
-    <!-- </template> -->
 
           <!-- Lazy-create the tabs for larger screen sizes. -->
       <app-header role="navigation" id="header" effects="waterfall" condenses reveals>
@@ -540,24 +513,17 @@
         <shop-tabs
                 selected="[[categoryName]]"
                 attr-for-selected="name">
-              <!-- <dom-repeat items="[[categories]]" as="category" initial-count="4">
-                <template> -->
+              
                 
                 <shop-tab name="profile">
                   <a on-click = "changeState" data-args="profile">Profile</a>
                 </shop-tab>
 
-                <!-- <shop-tab name="chat">
-                  <a on-click = "changeState" data-args="chat">Chat</a>
-                </shop-tab> -->
 
                 <shop-tab name="events">
                   <a on-click = "changeState" data-args="events">Events</a>
-                  <!-- <a href='javascript:;' onclick="changeState(announcements);">Announcements</a> -->
                 </shop-tab>
 
-                <!-- </template>
-              </dom-repeat> -->
             </shop-tabs>
     </div>
   </app-header>
@@ -571,7 +537,6 @@
       <div id="contentinner" hidden$="[[failure]]">
       <shop-image alt="[[item.name]]" src="[[_computeImg(routeData.item,visible)]]"></shop-image>
       
-      <!-- <template is="dom-if" if="[[isLoggedInSenderNew(routeData.item)]]"> -->
         <template is="dom-if" if="[[_shouldeditprofile]]">
 
 
