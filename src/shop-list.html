@@ -377,14 +377,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
                <div id = "deletewall">
                   <h5 style = "width:85%; display:inline-flex;"><a href="#/detail/[[postwall.senderid]]">[[postwall.sendername]]</a></h2>
-                  <template is="dom-if" if="[[_cansubmit(categoryMembers,visible)]]">
+                  <template is="dom-if" if="[[_cansubmit(category.members,visible)]]">
                     <paper-icon-button
                       class="menu-btn"
                       icon="delete"
                       on-click = "deletewall"
                       data-args="[[postwall.$key]]"
                       aria-label="Delete Wall Post"
-                      style="float:right; color: black; height: 40px; width: 40px;">
+                      style="float:right; color: black; height: 30px; width: 30px;">
                     </paper-icon-button>          
                   </template>
               </div>
