@@ -584,7 +584,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _tryReconnect: function() {
-        this.$.categoryData.refresh();
       },
 
       _offlineChanged: function(offline) {
@@ -667,10 +666,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         _submitWall: function(e) {
 
-          console.log('textareavalue');
-          console.log(this.textareavalue);
-          console.log('textareavalue');
-        
           if(this.textareavalue == null || this.textareavalue.length == 0){
 
             var snackbar  = document.createElement('shop-snackbar');

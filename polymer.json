@@ -28,17 +28,20 @@
   "extraDependencies": [
 	"app.yaml",    
 	"manifest.json",
-  "bower_components/webcomponentsjs/webcomponents-lite.min.js"
+  "bower_components/webcomponentsjs/webcomponents-lite.min.js",
+	"firebase-messaging-sw.js"
   ],
   "lint": {
     "rules": ["polymer-2-hybrid"]
   },
   "builds": [
     {
-      "preset": "es5-bundled"
+      "preset": "es5-bundled",
+      "js": {"minify": false}
     },
     {
-      "preset": "es6-unbundled"
+      "preset": "es6-unbundled",
+      "js": {"minify": false}
     }
   ]
 }

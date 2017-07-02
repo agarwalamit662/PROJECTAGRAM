@@ -568,7 +568,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
               var app = current.$.auth.app;
               var uidnew = firebaseUser.uid;
-              app.database().ref('users/' + firebaseUser.uid).set({
+              /*app.database().ref('users/' + firebaseUser.uid).set({
                 designation: current.$.designation.value,
                 dob: current.$.date.value + current.$.month.value,
                 education : current.$.education.value,
@@ -582,13 +582,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 team : current.$.team.value
               });
 
-              var yourObject = {};
-
-              yourObject[firebaseUser.uid] = "0";
-
-              //ref.child("Victor").setValue("setting custom key when pushing new data to firebase database");
-
-              app.database().ref('teams/' + current.$.team.value+'/members').child(uidnew).set('0');
+              app.database().ref('teams/' + current.$.team.value+'/members').child(uidnew).set('0');*/
 
               var file = current.$.fileButt.files[0];
 
@@ -608,6 +602,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
                 },
                 function complete(){
+
+                  app.database().ref('users/' + firebaseUser.uid).set({
+                      designation: current.$.designation.value,
+                      dob: current.$.date.value + current.$.month.value,
+                      education : current.$.education.value,
+                      emailId : current.$.accountEmail.value,
+                      fblink :current.$.fblink.value,
+                      linkedin :current.$.linkedin.value,
+                      mobileNum : current.$.accountPhone.value,
+                      name : current.$.fullName.value,
+                      passion :current.$.passion.value,
+                      shortBio : current.$.shortBio.value,
+                      team : current.$.team.value
+                  });
+
+                  app.database().ref('teams/' + current.$.team.value+'/members').child(uidnew).set('0');
 
                   current.debounce('_submitForm', function() {
                       current.$.checkoutForm.fire('iron-form-response', {

@@ -85,6 +85,7 @@ call `.activate()` on the element once you've
         var state = stateMap[app.name];
 
         app.messaging().getToken().then(function(token) {
+
           applyAll(app, '_setToken', token);
           applyAll(app, '_setStatusKnown', true);
           return token;
@@ -92,6 +93,17 @@ call `.activate()` on the element once you've
           applyAll(app, '_setToken', null);
           applyAll(app, '_setStatusKnown', true);
           applyAll(app, 'fire', 'error', err);
+          throw err;
+        });
+      }
+
+      function getToken(app) {
+        var state = stateMap[app.name];
+
+        app.messaging().getToken().then(function(token) {
+
+          return token;
+        }, function(err) {
           throw err;
         });
       }
@@ -222,6 +234,29 @@ call `.activate()` on the element once you've
           return this.messaging.requestPermission().then(function() {
             return refreshToken(this.app);
           }.bind(this));
+        },
+
+        deleteToken: function() {
+          if (!this.messaging) {
+            throw new Error('firebase-messaging: No app configured!');
+          }
+
+          
+
+          return this.messaging.deleteToken(this.token)
+            .then(function () {
+                return refreshToken(this.app);
+            }.bind(this));
+
+        },
+
+        getToken: function() {
+          if (!this.messaging) {
+            throw new Error('firebase-messaging: No app configured!');
+          }
+
+          return getToken(this.app);
+
         },
 
         /**

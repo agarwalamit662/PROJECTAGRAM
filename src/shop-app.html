@@ -22,6 +22,7 @@
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/neon-animation/animations/scale-up-animation.html">
 <link rel="import" href="../bower_components/neon-animation/animations/fade-out-animation.html">
+<link rel="import" href="../bower_components/polymerfire/firebase-messaging.html">
 <dom-module id="shop-app">
 
   <template>
@@ -245,6 +246,17 @@
       data="{{userprofile}}">
     </firebase-document>
 
+    <firebase-messaging
+      id="messaging"
+      token="{{token}}"
+      on-message="handleMessage">
+    </firebase-messaging>
+
+    <firebase-document
+      path="/users/[[user.uid]]/token"
+      data="[[token]]">
+    </firebase-document>
+
     <firebase-document
       path="/admins/[[user.uid]]"
       data="{{adminsdatadocument}}">
@@ -373,6 +385,11 @@
           type: Number,
           value: 0
         },
+
+        token: {
+          type: String
+        }
+
       },
 
       observers: [
@@ -420,6 +437,8 @@
         if (user) {
           this.set('opened', false);
           this.profilepic = "https://firebasestorage.googleapis.com/v0/b/note-app-firebase-5320d.appspot.com/o/users%2F"+this.user.uid+".jpg?alt=media";
+
+          this.subscribeUser();
 
         } else {
           this.set('opened', true);
@@ -578,13 +597,84 @@
 
       dologout: function(){
           var current = this;
+
+          /*var app = current.$.auth.app; 
+          app.database().ref('users/' + current.user.uid+'/token').remove();
+
+          this.unsubscribeUser();*/
+
           this.$.auth.signOut().then(function() {
-              console.log('Signed Out');
+              
               current.set('opened', true);
           }, function(error) {
-              console.error('Sign Out Error', error);
-          });        
-      }
+              
+          }); 
+
+      },
+
+
+      subscribeUser: function() {
+          var isSubscribed = false;
+          var current = this;
+          this.$.messaging.requestPermission()
+            .then(function () {
+
+                /*console.log('Successfully subscribeUser');
+                console.log('token');
+                console.log(this.token);
+                console.log('this.$.messaging.getToken()');
+                var tok = current.$.messaging.getToken();
+                console.log(tok);
+                console.log('this.$.messaging.getToken()');
+
+                current.$.messaging.getToken()
+                .then(function (currentToken) {
+                    if (currentToken) {
+                        current.updateSubscriptionOnServer(currentToken);
+                        isSubscribed = true;
+                    } else {
+                        current.updateSubscriptionOnServer(null);
+                    }
+                })
+                .catch(function (err) {
+                    isSubscribed = false;
+                    current.updateSubscriptionOnServer(null);
+                });*/
+            })
+            .catch(function (err) {
+                console.log('Unable to get permission to notify.', err);
+            });
+      },
+ 
+    unsubscribeUser: function() {
+        
+        var current = this;
+
+        if(this.token && this.token != null){
+          
+
+          this.$.messaging.deleteToken()
+            .then(function () {
+                
+                //updateSubscriptionOnServer(null);
+            })
+            .catch(function (err) {
+          });
+
+        }
+    },
+ 
+    updateSubscriptionOnServer : function(subscription) {
+        
+        var app = this.$.auth.app; 
+        app.database().ref('users/' + this.user.uid).child('token').set(subscription);
+     
+    },
+
+    handleMessage() {
+        //console.log('message received', arguments);
+    }
+
 
     });
 

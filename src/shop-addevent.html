@@ -674,9 +674,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
           var file  = this.files[0];
           
+          var newPostKey = app.database().ref().child('posts').push().key;
 
 
-          var postData = {
+          /*var postData = {
               author: this.userprofile.name,
               uid: this.user.uid,
               description: this.$.eventDes.value,
@@ -694,7 +695,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           updates['/posts/' + newPostKey] = postData;
           //updates['/user-posts/' + this.user.uid + '/' + newPostKey] = postData;
 
-          app.database().ref().update(updates);
+          app.database().ref().update(updates);*/
 
           if(this.files){
               var arrayLength = this.files.length;
@@ -1098,7 +1099,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       var self = this;
       this.resizeImage({
           file: file,
-          maxSize: 1200
+          maxSize: 800
       }).then(function (resizedImage) {
 
           current.fire('before-upload');
@@ -1129,25 +1130,53 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   self.set(prefix + '.complete', true); 
 
                   var app = current.$.auth.app;
-                  // Get a key for a new Post.
-                  var x = file.name;
-                  x = x.replace(/\.[^/.]+$/, "");
-                  app.database().ref().child('posts/'+keypost+'/images/'+x).set(file.name);
-                  /*app.database().ref().child('/user-posts/' + current.user.uid + '/'+keypost+'/images/'+x).set(file.name);*/
+                  
 
                   current.uploadedcnt = current.uploadedcnt+1;
                   var len = current.files.length;
 
                   if(len == current.uploadedcnt){
 
-                      current.debounce('_submitForm', function() {
+                      var fileFirst = current.files[0];
+                      var _timestamp = -1*Date.now();
+                      var postData = {
+                          author: current.userprofile.name,
+                          uid: current.user.uid,
+                          description: current.$.eventDes.value,
+                          title: current.$.eventTitle.value,
+                          date: current.$.date.value,
+                          firstimage : fileFirst.name,
+                          _timestamp: _timestamp
+                      };
+
+
+                    var updates = {};
+                    updates['/posts/' + keypost] = postData;
+
+                    app.database().ref().update(updates);
+
+                    if(current.files){
+                        var arrayLength = current.files.length;
+
+                        
+                        for (var i = 0; i < arrayLength; i++) {
+                              var fileNew = current.files[i];
+                              var x = fileNew.name;
+                              x = x.replace(/\.[^/.]+$/, "");
+                              app.database().ref().child('posts/'+keypost+'/images/'+x).set(fileNew.name);          
+                              
+                        }
+                    }
+
+
+                    current.debounce('_submitForm', function() {
                           current.$.checkoutForm.fire('iron-form-response', {
                             response: {
                                 success: 1,
                                 successMessage: 'Event Added Successfully..!!'
                             }
                           }, { bubbles: false });
-                      }, 1000);
+                    }, 1000);
                   }
 
                 }

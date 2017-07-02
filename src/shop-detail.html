@@ -618,7 +618,7 @@
               
               <div id = "deletewall">
                   <h5 style = "width:85%; display:inline-flex;"><a href="#/detail/[[postwall.senderid]]">[[postwall.sendername]]</a></h2>
-                  <template is="dom-if" if="[[_shouldeditprofile]]">
+                  <template is="dom-if" if="[[canDeletePost(postwall.senderid)]]">
                     <paper-icon-button
                       class="menu-btn"
                       icon="delete"
@@ -907,14 +907,7 @@
 
         //var args = Polymer.dom(e).path[1].getAttribute('data-args');
 
-        console.log('e');
-        console.log(e);
-        //var args = e.target.dataset.args.split(',');
-
         var post = e.model.post;
-        console.log('post');
-        console.log(post);
-        //var args = e.target.getAttribute('data-args').split(',');
         this.deletepostid = post.$key;
         this.$.actionsdelete.open();
         
@@ -961,6 +954,17 @@
       isLoggedInSenderNew: function(senderid){
         
         if(this.user != null && this.user.uid == senderid){
+          return true;
+        }
+        else{
+          return false;
+        }
+      },
+
+
+      canDeletePost: function(senderid){
+        
+        if(this._shouldeditprofile == true || this.user.uid == senderid){
           return true;
         }
         else{
@@ -1031,7 +1035,6 @@
       },
 
       _tryReconnect: function() {
-        this.$.categoryData.refresh();
       },
 
       _offlineChanged: function(offline) {

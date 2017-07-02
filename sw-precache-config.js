@@ -2,6 +2,7 @@ module.exports = {
   staticFileGlobs: [
     '/index.html',
     '/manifest.json',
+    '/firebase-messaging-sw.js',
     '/bower_components/webcomponentsjs/webcomponents-lite.min.js',
     '/images/*',
     '/src/img/*'
